@@ -1,4 +1,4 @@
 (executable
- (public_name oliss)
+ (public_name bliss)
  (name main)
- (libraries oliss))
+ (libraries bliss cmdliner))

@@ -1,6 +1,6 @@
 (lang dune 3.16)
 
-(name oliss)
+(name bliss)
 
 (generate_opam_files true)
 
@@ -16,10 +16,15 @@
 (documentation https://url/to/documentation)
 
 (package
- (name oliss)
+ (name bliss)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune)
+ (depends
+   (ocaml (>= 5))
+   dune
+   containers
+   cmdliner
+   ppx_deriving)
  (tags
   (topics "to describe" your project)))
 

@@ -59,8 +59,9 @@ let rec categorize stack current = function
           | ";" ->
               let new_rest =
                 List.drop_while (fun elem -> not @@ String.equal ";" elem) rest
+                |> List.drop 1
               in
-              categorize stack current @@ List.drop 1 new_rest
+              categorize stack current new_rest
           (* opening *)
           | "(" -> categorize (current :: stack) (List []) rest
           | "[" -> categorize (current :: stack) (ValueList []) rest
@@ -115,7 +116,7 @@ let tokenize code =
 ;;
 
 let parse file =
-  print_endline @@ "* Compiling " ^ file;
+  print_endline @@ " * Compiling " ^ file;
 
   let contents =
     try In_channel.(with_open_text file input_all)

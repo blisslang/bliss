@@ -5,6 +5,7 @@ _perf
 _coverage
 __pycache__
 *.install
+dune.lock
 
 # vim swap files
 *.swp

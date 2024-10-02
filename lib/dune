@@ -1,4 +1,4 @@
 (library
- (name oliss)
+ (name bliss)
  (libraries containers)
  (preprocess (pps ppx_deriving.show)))
