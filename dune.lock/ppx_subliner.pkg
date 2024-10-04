@@ -1,0 +1,15 @@
+(version 0.2.1)
+
+(build
+ (progn
+  (when
+   %{pkg-self:dev}
+   (run dune subst))
+  (run dune build -p %{pkg-self:name} -j %{jobs} @install)))
+
+(depends dune ppxlib cmdliner ppx_make)
+
+(source
+ (fetch
+  (url https://github.com/bn-d/ppx_subliner/archive/refs/tags/v0.2.1.tar.gz)
+  (checksum md5=9cb768124f7bc03c9a732a3f680f100f)))

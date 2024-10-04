@@ -1,0 +1,15 @@
+(version 0.3.4)
+
+(build
+ (progn
+  (when
+   %{pkg-self:dev}
+   (run dune subst))
+  (run dune build -p %{pkg-self:name} -j %{jobs} @install)))
+
+(depends dune ppxlib)
+
+(source
+ (fetch
+  (url https://github.com/bn-d/ppx_make/archive/refs/tags/v0.3.4.tar.gz)
+  (checksum md5=008594f8821d807126f40c94d68f5a89)))
