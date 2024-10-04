@@ -9,8 +9,8 @@ type cli =
           [@doc "The file to compile."]
           [@default "main.bliss"]
     }
-      (**Compile a .bliss file to a native executable. Takes in a positional argument of the file to compile. If the file does not exist or is not a .bliss source file it stops immediately.*)
-  | Prelude  (**Show the prelude.*)
+      (** Compile a .bliss file to a native executable. Targets main.bliss if no file is sent in.*)
+  | Prelude  (** Show the prelude. *)
 [@@deriving subliner]
 
 let run = function
@@ -38,4 +38,4 @@ eval.cli <- run]
     ret
     @@ const
     @@ `Error (true, "unknown command, must be either 'compile' or 'prelude'."))]
-(**The compiler and toolchain for the Bliss programming language.*)
+(** The compiler and toolchain for the Bliss programming language. *)
