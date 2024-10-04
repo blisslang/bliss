@@ -9,6 +9,8 @@ type node =
   | Number of float
 [@@deriving show]
 
+type node_list = node list [@@deriving show]
+
 type tokens = string list [@@deriving show]
 
 let atom x =
@@ -39,7 +41,7 @@ let rec categorize stack current = function
       | String string_value -> (
           match token with
           (* closing *)
-          | "\"" when not @@ String.equal (take_last string_value) "\\" -> (
+          | "\"" when not @@ String.ends_with ~suffix:"\\" string_value -> (
               match stack with
               | new_current :: new_stack -> (
                   match add_to_node new_current @@ reverse_node current with
@@ -90,33 +92,28 @@ let rec categorize stack current = function
               | Error reason -> Error reason)))
 ;;
 
-let rec contextual_split acc = function
-  | [] -> List.rev acc
-  | c :: rest when String.contains "[]();\"" c ->
-      contextual_split (String.of_char c :: acc) rest
-  | c :: rest ->
-      let token =
-        List.take_while (fun c' -> not (is_delim c' || is_space c')) (c :: rest)
-      in
-      let rest' = List.drop (List.length token) rest in
-      contextual_split (String.of_list token :: acc) rest'
-;;
-
-let pad_delims =
+let pad_delims str ~acc =
   String.fold_right
-    (fun c acc ->
-      if is_delim c then " " ^ String.of_char c ^ " " ^ acc
-      else String.of_char c ^ acc)
-    ""
+    (fun c acc' ->
+      if is_delim c then " " ^ String.of_char c ^ " " ^ acc'
+      else String.of_char c ^ acc')
+    str acc
 ;;
 
 let tokenize code =
-  contextual_split [] @@ String.to_list (code |> pad_delims |> String.trim)
-  |> List.filter (fun s -> not @@ String.is_empty s)
+  let split =
+    code
+    |> pad_delims ~acc:""
+    |> String.replace ~sub:"\n" ~by:" "
+    |> String.replace ~sub:"\t" ~by:" "
+    |> String.split ~by:" "
+  in
+
+  List.filter (fun s -> not @@ String.is_empty s) split
 ;;
 
 let parse file =
-  print_endline @@ " * Compiling " ^ file;
+  print_endline @@ " ==> Compiling: " ^ file;
 
   let contents =
     try In_channel.(with_open_text file input_all)
@@ -125,13 +122,25 @@ let parse file =
       exit 1
   in
 
-  let tokens = tokenize contents in
-  print_endline @@ show_tokens tokens;
+  if not @@ String.ends_with ~suffix:".bliss" file then (
+    prerr_endline
+    @@ file
+    ^ ": File has to contain Bliss source code (using file extension .bliss)";
+    exit 1);
 
+  (* print_endline "     * Tokenizing source..."; *)
+  let tokens = tokenize contents in
+
+  print_endline @@ "TOKENS:\n" ^ show_tokens tokens;
+
+  (* print_endline "     * Parsing tokens..."; *)
   let categorized = categorize [] (List []) tokens in
   match categorized with
   | Ok ast ->
-      print_endline @@ show_node ast;
+      (* print_endline "     * Emitting Ocaml..."; *)
+      print_endline @@ "AST:\n" ^ show_node ast;
+
+      (* print_endline " ==> Compilation finished as \027[36mmain.exe\027[0m"; *)
       ast
   | Error reason ->
       prerr_endline reason;

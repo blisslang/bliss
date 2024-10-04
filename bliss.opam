@@ -10,11 +10,11 @@ homepage: "https://github.com/username/reponame"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/username/reponame/issues"
 depends: [
-  "ocaml" {>= "5"}
+  "ocaml" {>= "5.2"}
   "dune" {>= "3.16"}
   "containers"
-  "cmdliner"
   "ppx_deriving"
+  "ppx_subliner"
   "odoc" {with-doc}
 ]
 build: [

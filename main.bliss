@@ -6,4 +6,4 @@
 (let result (fib 10))
 (put result)
 
-(put "Hello, world! Banan 8 \n\"gott\"?")
+(put "Hello, \"world!\"")

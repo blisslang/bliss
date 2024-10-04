@@ -20,11 +20,11 @@
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends
-   (ocaml (>= 5))
+   (ocaml (>= 5.2))
    dune
    containers
-   cmdliner
-   ppx_deriving)
+   ppx_deriving
+   ppx_subliner)
  (tags
   (topics "to describe" your project)))
 
