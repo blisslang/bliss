@@ -1,3 +1,3 @@
 (library
- (name bliss)
+ (name lib)
  (libraries containers compiler))

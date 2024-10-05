@@ -1,4 +1,4 @@
-open Bliss
+open Lib
 open Cmdliner
 
 type cli =
