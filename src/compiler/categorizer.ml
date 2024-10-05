@@ -1,16 +1,5 @@
 open Containers
-
-type node =
-  | List of node list
-  | ValueList of node list
-  | String of string
-  | Symbol of string
-  | Number of float
-[@@deriving show]
-
-type node_list = node list [@@deriving show]
-
-type tokens = string list [@@deriving show]
+open Types
 
 let atom x =
   match Float.of_string_opt x with Some x' -> Number x' | None -> Symbol x

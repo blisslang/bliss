@@ -1,6 +1,7 @@
 open Containers
 
 let compile file =
+  let open Compiler in
   print_endline @@ " ==> Compiling: " ^ file;
 
   let contents =
@@ -17,14 +18,16 @@ let compile file =
     exit 1);
 
   print_endline "     * Tokenizing source...";
-  let tokens = Compiler.Tokenizer.tokenize contents in
+  let tokens = Tokenizer.tokenize contents in
 
   (* print_endline @@ "TOKENS:\n" ^ Categorizer.show_tokens tokens; *)
   print_endline "     * Parsing tokens...";
-  match Compiler.Categorizer.categorize [] (List []) tokens with
-  | Ok _ast ->
-      print_endline "     * Emitting Ocaml...";
+  match Categorizer.categorize [] (List []) tokens with
+  | Ok ast ->
       (* print_endline @@ "AST:\n" ^ Categorizer.show_node ast; *)
+      print_endline "     * Emitting Ocaml...";
+      ignore @@ Emitter.emit ast;
+
       print_endline " ==> Compilation finished as \027[36mmain.exe\027[0m"
   | Error reason ->
       prerr_endline reason;
