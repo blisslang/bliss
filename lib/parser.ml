@@ -15,7 +15,7 @@ type tokens = string list [@@deriving show]
 
 let atom x =
   match Float.of_string_opt x with
-  | Some x_float -> Number x_float
+  | Some x' -> Number x'
   | None -> Symbol x
 ;;
 
