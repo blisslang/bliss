@@ -14,7 +14,7 @@ type cli =
 [@@deriving subliner]
 
 let run = function
-  | Compile { filename } -> ignore @@ Parser.parse filename
+  | Compile { filename } -> Commands.compile filename
   | Prelude ->
       print_endline
         "                   \\   |   /            _\\/_\n\

@@ -1,4 +1,4 @@
 (library
- (name bliss)
- (libraries containers)
+ (name compiler)
+ (libraries containers util)
  (preprocess (pps ppx_deriving.show)))
