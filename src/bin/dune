@@ -2,4 +2,5 @@
  (public_name bliss)
  (name main)
  (libraries lib)
- (preprocess (pps ppx_subliner)))
+ (preprocess
+  (pps ppx_subliner)))
