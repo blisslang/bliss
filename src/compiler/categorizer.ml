@@ -13,9 +13,7 @@ type node_list = node list [@@deriving show]
 type tokens = string list [@@deriving show]
 
 let atom x =
-  match Float.of_string_opt x with
-  | Some x' -> Number x'
-  | None -> Symbol x
+  match Float.of_string_opt x with Some x' -> Number x' | None -> Symbol x
 ;;
 
 let add_to_node node y =
