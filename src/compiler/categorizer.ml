@@ -5,6 +5,8 @@ let atom x =
   match Float.of_string_opt x with Some x' -> Number x' | None -> Symbol x
 ;;
 
+let string x = String x
+
 let add_to_node node y =
   match (node, y) with
   | List nodes, y -> Ok (List (y :: nodes))
@@ -19,61 +21,48 @@ let reverse_node = function
   | other -> other
 ;;
 
-let rec categorize stack current = function
+let rec categorize_closing stack current rest ~str_rep =
+  match stack with
+  | new_current :: new_stack -> (
+      match add_to_node new_current @@ reverse_node current with
+      | Ok new_new_current -> categorize new_stack new_new_current rest
+      | Error reason -> Error reason)
+  | [] -> Error ("Unexpected '" ^ str_rep ^ "'")
+
+and categorize_comment stack current rest =
+  let new_rest =
+    List.drop_while (fun elem -> not @@ String.equal ";" elem) rest
+    |> List.drop 1
+  in
+  categorize stack current new_rest
+
+and categorize_else stack current rest token ~type_fun =
+  match add_to_node current @@ type_fun token with
+  | Ok new_current -> categorize stack new_current rest
+  | Error reason -> Error reason
+
+and categorize stack current = function
   | [] -> Ok (reverse_node current)
   | token :: rest -> (
       match current with
-      (* in string *)
       | String string_value -> (
           match token with
           (* closing *)
-          | "\"" when not @@ String.ends_with ~suffix:"\\" string_value -> (
-              match stack with
-              | new_current :: new_stack -> (
-                  match add_to_node new_current @@ reverse_node current with
-                  | Ok new_new_current ->
-                      categorize new_stack new_new_current rest
-                  | Error reason -> Error reason)
-              | [] -> Error "Unexpected '\"'")
+          | "\"" when not @@ String.ends_with ~suffix:"\\" string_value ->
+              categorize_closing stack current rest ~str_rep:"\""
           (* else *)
-          | _ -> (
-              match add_to_node current @@ String token with
-              | Ok new_current -> categorize stack new_current rest
-              | Error reason -> Error reason))
-      (* not in string *)
+          | _ -> categorize_else stack current rest token ~type_fun:string)
       | _ -> (
           match token with
           (* comment *)
-          | ";" ->
-              let new_rest =
-                List.drop_while (fun elem -> not @@ String.equal ";" elem) rest
-                |> List.drop 1
-              in
-              categorize stack current new_rest
+          | ";" -> categorize_comment stack current rest
           (* opening *)
           | "(" -> categorize (current :: stack) (List []) rest
           | "[" -> categorize (current :: stack) (ValueList []) rest
           | "\"" -> categorize (current :: stack) (String "") rest
           (* closing *)
-          | ")" -> (
-              match stack with
-              | new_current :: new_stack -> (
-                  match add_to_node new_current @@ reverse_node current with
-                  | Ok new_new_current ->
-                      categorize new_stack new_new_current rest
-                  | Error reason -> Error reason)
-              | [] -> Error "Unexpected ')'")
-          | "]" -> (
-              match stack with
-              | new_current :: new_stack -> (
-                  match add_to_node new_current @@ reverse_node current with
-                  | Ok new_new_current ->
-                      categorize new_stack new_new_current rest
-                  | Error reason -> Error reason)
-              | [] -> Error "Unexpected ']'")
+          | ")" -> categorize_closing stack current rest ~str_rep:")"
+          | "]" -> categorize_closing stack current rest ~str_rep:"]"
           (* else *)
-          | _ -> (
-              match add_to_node current @@ atom token with
-              | Ok new_current -> categorize stack new_current rest
-              | Error reason -> Error reason)))
+          | _ -> categorize_else stack current rest token ~type_fun:atom))
 ;;
