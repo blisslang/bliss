@@ -24,9 +24,9 @@ let compile file =
   print_endline "     * Parsing tokens...";
   match Categorizer.categorize [] (List []) tokens with
   | Ok ast ->
-      (* print_endline @@ "AST:\n" ^ Categorizer.show_node ast; *)
+      print_endline @@ "AST:\n" ^ Types.show_node ast;
       print_endline "     * Emitting Ocaml...";
-      ignore @@ Emitter.emit ast;
+      ignore @@ Emitter.emit "" ast;
 
       print_endline " ==> Compilation finished as \027[36mmain.exe\027[0m"
   | Error reason ->
