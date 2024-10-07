@@ -1,4 +1,4 @@
-(def-rec fib [n]
+;(def-rec fib [n]
 	(if (< n 2)
 	n
 	(+ (fib (- n 1)) (fib (- n 2)))))
@@ -6,4 +6,15 @@
 (let result (fib 10))
 (put result)
 
-(put "Hello, \"world!\"")
+(put "Hello, \"world!\"");
+
+;(def _ []
+	(print_endline "Hello, world!"));
+
+(def main []
+	((print_endline "Hello, world"))
+	(print_int 1))
+
+(case true
+	(true (print_endline "TRUE"))
+	(false (print_endline "FALSE")))
