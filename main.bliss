@@ -1,5 +1,12 @@
+;----- START OF STDLIB -----;
+
+(def put [str]
+  (print-endline str))
+
+;------ END OF STDLIB ------;
+
 (def main []
-	(print-endline "Hello, world!"))
+	(put "Hello, world!"))
 
 (def baz [wibble wobble]
 	(ignore (string-of-int wibble))
