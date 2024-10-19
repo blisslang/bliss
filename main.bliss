@@ -1,20 +1,6 @@
-;(def-rec fib [n]
-	(if (< n 2)
-	n
-	(+ (fib (- n 1)) (fib (- n 2)))))
-
-(let result (fib 10))
-(put result)
-
-(put "Hello, \"world!\"");
-
-;(def _ []
-	(print_endline "Hello, world!"));
-
 (def main []
-	((print_endline "Hello, world"))
-	(print_int 1))
+	(print-endline "Hello, world!"))
 
-(case true
-	(true (print_endline "TRUE"))
-	(false (print_endline "FALSE")))
+(def baz [wibble wobble]
+	(ignore (string-of-int wibble))
+	(print-int wobble))

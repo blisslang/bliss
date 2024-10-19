@@ -20,15 +20,13 @@ let compile file =
   print_endline "     * Tokenizing source...";
   let tokens = Tokenizer.tokenize contents in
 
-  (* print_endline @@ "TOKENS:\n" ^ Categorizer.show_tokens tokens; *)
   print_endline "     * Parsing tokens...";
   match Categorizer.categorize [] (List []) tokens with
   | Ok ast ->
-      (* print_endline @@ "AST:\n" ^ Types.show_node ast; *)
-      print_endline "     * Emitting Ocaml...";
-      let emitted = Emitter.emit "" "" [ ast ] in
+      print_endline "     * Emitting OCaml...";
+      let emitted = Emitter.emit "" [ ast ] in
 
-      print_endline @@ "Emitted Ocaml: " ^ emitted;
+      print_endline @@ "Emitted OCaml:\n" ^ emitted;
 
       let out_file = Out_channel.open_text "../fake/bin/main.ml" in
       Out_channel.output_string out_file emitted;
@@ -37,4 +35,3 @@ let compile file =
   | Error reason ->
       prerr_endline reason;
       exit 1
-;;

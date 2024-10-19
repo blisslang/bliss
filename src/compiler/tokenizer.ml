@@ -7,7 +7,6 @@ let pad_delims str ~acc =
       if is_delim c then " " ^ String.of_char c ^ " " ^ acc'
       else String.of_char c ^ acc')
     str acc
-;;
 
 let tokenize code =
   let split =
@@ -19,4 +18,3 @@ let tokenize code =
   in
 
   List.filter (fun s -> not @@ String.is_empty s) split
-;;

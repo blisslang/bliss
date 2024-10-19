@@ -3,7 +3,6 @@ open Types
 
 let atom x =
   match Float.of_string_opt x with Some x' -> Number x' | None -> Symbol x
-;;
 
 let string x = String x
 
@@ -13,13 +12,11 @@ let add_to_node node y =
   | ValueList value_nodes, y -> Ok (ValueList (y :: value_nodes))
   | String string, String y -> Ok (String (string ^ " " ^ y))
   | _, _ -> Error "x has to be a collection node"
-;;
 
 let reverse_node = function
   | List nodes -> List (List.rev nodes)
   | ValueList value_nodes -> ValueList (List.rev value_nodes)
   | other -> other
-;;
 
 let rec categorize_closing stack current rest ~str_rep =
   match stack with
@@ -65,4 +62,3 @@ and categorize stack current = function
           | "]" -> categorize_closing stack current rest ~str_rep:"]"
           (* else *)
           | _ -> categorize_else stack current rest token ~type_fun:atom))
-;;

@@ -27,7 +27,6 @@ let run = function
          Credits:\n\
         \ * DJARUUN (https://github.com/djaruun)\n\
         \ * The almighty ChatGPT (https://chatgpt.com)"
-;;
 
 [%%subliner.cmds
 eval.cli <- run]
