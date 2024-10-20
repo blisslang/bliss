@@ -83,3 +83,5 @@ and emit stack = function
       | Symbol x -> emit (join [ stack; dehyphen_smart x; " " ]) rest
       | Number x -> emit (join [ stack; Float.to_string x; " " ]) rest
       | String x -> emit (join [ stack; "\""; x; "\" " ]) rest)
+
+let emit ast = emit "" [ ast ]

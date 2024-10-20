@@ -21,10 +21,10 @@ let compile file =
   let tokens = Tokenizer.tokenize contents in
 
   print_endline "     * Parsing tokens...";
-  match Categorizer.categorize [] (List []) tokens with
+  match Categorizer.categorize tokens with
   | Ok ast ->
       print_endline "     * Emitting OCaml...";
-      let emitted = Emitter.emit "" [ ast ] in
+      let emitted = Emitter.emit ast in
 
       print_endline @@ "Emitted OCaml:\n" ^ emitted;
 

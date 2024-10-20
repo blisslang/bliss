@@ -1,3 +1,5 @@
+open Containers
+
 type node =
   | List of node list
   | ValueList of node list
@@ -6,6 +8,4 @@ type node =
   | Number of float
 [@@deriving show]
 
-type node_list = node list [@@deriving show]
-
-type tokens = string list [@@deriving show]
+let show_node_list lst = List.to_string (fun x -> show_node x) lst

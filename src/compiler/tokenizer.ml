@@ -16,5 +16,4 @@ let tokenize code =
     |> String.replace ~sub:"\t" ~by:" "
     |> String.split ~by:" "
   in
-
   List.filter (fun s -> not @@ String.is_empty s) split

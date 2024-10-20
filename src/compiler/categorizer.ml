@@ -62,3 +62,5 @@ and categorize stack current = function
           | "]" -> categorize_closing stack current rest ~str_rep:"]"
           (* else *)
           | _ -> categorize_else stack current rest token ~type_fun:atom))
+
+let categorize tokens = categorize [] (List []) tokens
