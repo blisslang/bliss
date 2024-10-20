@@ -63,4 +63,5 @@ and categorize stack current = function
           (* else *)
           | _ -> categorize_else stack current rest token ~type_fun:atom))
 
+(** Categorizes (constructs an AST) from a list of tokens produced by [Tokenizer.tokenize] *)
 let categorize tokens = categorize [] (List []) tokens

@@ -84,4 +84,5 @@ and emit stack = function
       | Number x -> emit (join [ stack; Float.to_string x; " " ]) rest
       | String x -> emit (join [ stack; "\""; x; "\" " ]) rest)
 
+(** Emits OCaml code from the AST produced by [Categorizer.categorize] *)
 let emit ast = emit "" [ ast ]

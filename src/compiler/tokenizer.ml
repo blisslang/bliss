@@ -8,6 +8,7 @@ let pad_delims str ~acc =
       else String.of_char c ^ acc')
     str acc
 
+(** Tokenizes Bliss source code by padding delimiters and splitting on whitespace *)
 let tokenize code =
   let split =
     code
