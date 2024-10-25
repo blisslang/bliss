@@ -1,6 +1,13 @@
 open Containers
 
 let compile file =
+  (* Exits with an error if the passed in source file isnt a bliss file *)
+  if not @@ String.ends_with ~suffix:".bliss" file then (
+    prerr_endline
+    @@ file
+    ^ ": File has to contain Bliss source code (using file extension .bliss)";
+    exit 1);
+
   let open Compiler in
   print_endline @@ " ==> Compiling: " ^ file;
 
@@ -10,12 +17,6 @@ let compile file =
       prerr_endline reason;
       exit 1
   in
-
-  if not @@ String.ends_with ~suffix:".bliss" file then (
-    prerr_endline
-    @@ file
-    ^ ": File has to contain Bliss source code (using file extension .bliss)";
-    exit 1);
 
   print_endline "     * Tokenizing source...";
   let tokens = Tokenizer.tokenize contents in
