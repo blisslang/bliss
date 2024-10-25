@@ -1,15 +1,15 @@
 open Containers
 
 let compile file =
+  let open Compiler in
+  print_endline @@ " ==> Compiling: " ^ file;
+
   (* Exits with an error if the passed in source file isnt a bliss file *)
   if not @@ String.ends_with ~suffix:".bliss" file then (
     prerr_endline
     @@ file
     ^ ": File has to contain Bliss source code (using file extension .bliss)";
     exit 1);
-
-  let open Compiler in
-  print_endline @@ " ==> Compiling: " ^ file;
 
   let contents =
     try In_channel.(with_open_text file input_all)
