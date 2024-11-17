@@ -10,10 +10,10 @@
 
 	(mod Math
 		(def-rec fib [n]
-		(if (< n 2)
-			n
-			(+ (fib (- n 1))
-				 (fib (- n 2)))))))
+		  (if (< n 2)
+			  n
+			  (+ (fib (- n 1))
+				   (fib (- n 2)))))))
 ;----- Bliss stdlib -----;
 
 (use Bliss)
