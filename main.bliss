@@ -2,7 +2,7 @@
 (mod Bliss
 	(mod IO
 		(def puts [str]
-		(print-endline str)))
+		  (print-endline str)))
 
 	(mod String
 		(def of-float! [str]
