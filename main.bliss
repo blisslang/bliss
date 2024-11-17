@@ -1,13 +1,22 @@
-;----- START OF STDLIB -----;
+;----- Bliss stdlib -----;
+(mod Bliss
+	(mod IO
+		(def puts [str]
+		(print-endline str)))
 
-(def put [str]
-  (print-endline str))
+	(mod String
+		(def of-float! [str]
+			(string-of-float str)))
 
-;------ END OF STDLIB ------;
+	(mod Math
+		(def-rec fib [n]
+		(if (< n 2)
+			n
+			(+ (fib (- n 1))
+				 (fib (- n 2)))))))
+;----- Bliss stdlib -----;
 
-(def main []
-	(put "Hello, world!"))
+(use Bliss)
 
-(def baz [wibble wobble]
-	(ignore (string-of-int wibble))
-	(print-int wobble))
+(def main
+	(IO/puts (String/of-float! (Math/fib 8))))

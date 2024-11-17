@@ -20,11 +20,13 @@
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends
-   (ocaml (>= 5.2))
-   dune
-   containers
-   ppx_deriving
-   ppx_subliner)
+  (ocaml
+   (>= 5.2))
+  dune
+  containers
+  ppx_deriving
+  ppx_subliner
+  utop)
  (tags
   (topics "to describe" your project)))
 

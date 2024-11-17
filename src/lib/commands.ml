@@ -12,10 +12,11 @@ let compile file =
     exit 1);
 
   let contents =
-    try In_channel.(with_open_text file input_all)
-    with Sys_error reason ->
-      prerr_endline reason;
-      exit 1
+    match In_channel.(with_open_text file input_all) with
+    | a -> a
+    | exception Sys_error reason ->
+        prerr_endline reason;
+        exit 1
   in
 
   print_endline "     * Tokenizing source...";
@@ -29,10 +30,23 @@ let compile file =
 
       print_endline @@ "Emitted OCaml:\n" ^ emitted;
 
-      let out_file = Out_channel.open_text "../fake/bin/main.ml" in
+      let out_file = Out_channel.open_text "./_out/out.ml" in
       Out_channel.output_string out_file emitted;
 
       print_endline " ==> Compilation finished as \027[36mmain.exe\027[0m"
   | Error reason ->
       prerr_endline reason;
       exit 1
+
+let prelude () =
+  print_endline
+    "                   \\   |   /            _\\/_\n\
+    \                     .-'-.              //o\\  _\\/_\n\
+    \  _  ___  __  _ --_ /     \\ _--_ __  __ _ | __/o\\\\ _\n\
+     =-=-_=-=-_=-=_=-_= -=======- = =-=_=-=_,-'|\"'\"\"-|-,_\n\
+    \ =- _=-=-_=- _=-= _--=====- _=-=_-_,-\"          |\n\
+     jgs=- =- =-= =- = -  -===- -= - .\"\n\n\
+     The compiler and toolchain for the Bliss programming language.\n\n\
+     Credits:\n\
+    \ * DJARUUN (https://github.com/djaruun)\n\
+    \ * The almighty ChatGPT (https://chatgpt.com)"

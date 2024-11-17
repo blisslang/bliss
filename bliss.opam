@@ -15,6 +15,7 @@ depends: [
   "containers"
   "ppx_deriving"
   "ppx_subliner"
+  "utop"
   "odoc" {with-doc}
 ]
 build: [
