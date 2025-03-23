@@ -1,6 +1,0 @@
-(executable
- (public_name bliss)
- (name main)
- (libraries bliss)
- (preprocess
-  (pps ppx_subliner)))
