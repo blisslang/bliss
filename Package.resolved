@@ -1,0 +1,69 @@
+{
+  "originHash" : "65f2bf74e8c789b1954133183a3ca2accbc23ddd57707327c0e5d4bafd6c6285",
+  "pins" : [
+    {
+      "identity" : "colorizeswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mtynior/ColorizeSwift.git",
+      "state" : {
+        "revision" : "4e7daa138510b77a3cce9f6a31a116f8536347dd",
+        "version" : "1.7.0"
+      }
+    },
+    {
+      "identity" : "curry",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/thoughtbot/Curry.git",
+      "state" : {
+        "revision" : "4331dd50bc1db007db664a23f32e6f3df93d4e1a",
+        "version" : "4.0.2"
+      }
+    },
+    {
+      "identity" : "flatten",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/YusukeHosonuma/Flatten.git",
+      "state" : {
+        "revision" : "5286148aa255f57863e0d7e2b827ca6b91677051",
+        "version" : "0.1.0"
+      }
+    },
+    {
+      "identity" : "shlist",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/YusukeHosonuma/SHList.git",
+      "state" : {
+        "revision" : "6c61f5382dd07a64d76bc8b7fad8cec0d8a4ff7a",
+        "version" : "0.1.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "41982a3656a71c768319979febd796c6fd111d5c",
+        "version" : "1.5.0"
+      }
+    },
+    {
+      "identity" : "swiftparamtest",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/YusukeHosonuma/SwiftParamTest.git",
+      "state" : {
+        "revision" : "f513e1dbbdd86e2ca2b672537f4bcb4417f94c27",
+        "version" : "2.2.1"
+      }
+    },
+    {
+      "identity" : "swiftprettyprint",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/YusukeHosonuma/SwiftPrettyPrint.git",
+      "state" : {
+        "revision" : "1ad0d60150ae89c95846a736cb71cf322c8c8610",
+        "version" : "1.4.0"
+      }
+    }
+  ],
+  "version" : 3
+}
