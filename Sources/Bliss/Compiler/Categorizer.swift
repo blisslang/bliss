@@ -13,12 +13,12 @@ struct Categorizer {
         return .String(token)
     }
 
-    mutating func categorizeOpening(newCurrent: Node) {
+    private mutating func categorizeOpening(newCurrent: Node) {
         stack.append(current)
         current = newCurrent
     }
 
-    mutating func categorizeClosing(stringRepr: String) throws(CompilerError) {
+    private mutating func categorizeClosing(stringRepr: String) throws(CompilerError) {
         guard case .some(var newCurrent) = stack.popLast() else {
             throw .unexpectedNodeError("Unexpected node: \(stringRepr)")
         }
@@ -27,13 +27,13 @@ struct Categorizer {
         current = newCurrent
     }
 
-    mutating func categorizeElse(_ token: String, typeFun: (_ token: String) -> Node)
+    private mutating func categorizeElse(_ token: String, typeFun: (_ token: String) -> Node)
         throws(CompilerError)
     {
         try current.add(node: typeFun(token))
     }
 
-    mutating func categorizeComment(_ tokens: inout [String]) {
+    private mutating func categorizeComment(_ tokens: inout [String]) {
         tokens = Array(
             tokens
                 .drop { $0 != ";" }
