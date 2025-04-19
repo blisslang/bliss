@@ -1,24 +1,12 @@
-;----- Bliss stdlib -----;
-(mod Bliss
-	(mod IO
-		(def puts [str]
-		  (print-endline str)))
-
-	(mod String
-		(def of-float! [str]
-			(string-of-float str)))
-
-	(mod Math
-		(def-rec fib [n]
-		  (if (< n 2)
-			  n
-			  (+ (fib (- n 1))
-				   (fib (- n 2)))))))
-;----- Bliss stdlib -----;
-
-(use Bliss)
-
 (def main
-	; Strings dont work yet :'( ;
-	; (IO/puts "Hello, world!") ;
-	(IO/puts (String/of-float! (Math/fib 8))))
+	(def print+? [val +amount]
+		(print (+ val +amount)))
+
+	(letm x 5)
+	(print+? x 20)
+	(set x (+ x 5))
+	(print+? x 10))
+
+;main(...) {
+	...
+};

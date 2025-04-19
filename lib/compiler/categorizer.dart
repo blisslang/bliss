@@ -10,12 +10,10 @@ class Categorizer {
       return StringNode(token);
     }
 
-    switch (num.tryParse(token)) {
-      case null:
-        return SymbolNode(token);
-      case final number:
-        return NumberNode(number);
-    }
+    return switch (num.tryParse(token)) {
+      null => SymbolNode(token),
+      final number => NumberNode(number),
+    };
   }
 
   void _categorizeOpening(Node newCurrent) {

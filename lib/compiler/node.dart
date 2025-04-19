@@ -5,8 +5,6 @@ sealed class Node {
   Node(this.contents);
 
   void add(Node newNode) {
-    // print("NODE TO ADD: ${newNode.contents}");
-
     switch (this) {
       case ListNode() || ValueListNode():
         (contents as List<Node>).add(newNode);
