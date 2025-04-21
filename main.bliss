@@ -1,25 +1,20 @@
 (def bubble-sort [lst]
   (def aux [lst i]
-    (when (>= i (- lst@length 1))
-      (ret 0))
+    (when (>= i (- lst@length 1)) (ret 0))
 
-    (letm swaps-this-step 0)
-
+    (letm swaps 0)
     (when (> (cget lst i) (cget lst (+ i 1)))
       (cswap lst i (+ i 1))
-      (set swaps-this-step 1))
+      (set swaps 1))
 
-    (let swaps-in-rest-of-pass (aux lst (+ i 1)))
+    (ret (+ swaps (aux lst (+ i 1)))))
 
-    (ret (+ swaps-this-step swaps-in-rest-of-pass)))
-
-  (when (< (@length lst) 2)
+  (when (< lst@length 2)
     (ret))
 
   (let swaps (aux lst 0))
 
-  (when (> swaps 0)
-    (bubble-sort lst)))
+  (when (> swaps 0) (bubble-sort lst)))
 
 (let nums [10 8 3 7 2 1 4 6 5 9])
 (print nums)
