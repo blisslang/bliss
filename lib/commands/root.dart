@@ -1,11 +1,15 @@
 import "package:args/command_runner.dart";
 import 'package:bliss/commands/compile.dart';
+import 'package:bliss/commands/generate.dart';
 
 CommandRunner rootCmd() {
-  final runner = CommandRunner(
-    "bliss",
-    "The compiler and toolchain for the Bliss Programming Language.",
-  )..addCommand(CompileCmd());
+  final runner =
+      CommandRunner(
+          "bliss",
+          "The compiler and toolchain for the Bliss Programming Language.",
+        )
+        ..addCommand(GenerateCmd())
+        ..addCommand(CompileCmd());
 
   return runner;
 }

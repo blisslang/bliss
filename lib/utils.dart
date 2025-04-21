@@ -1,3 +1,5 @@
+import 'package:bliss/compiler/emitter.dart';
+
 const _delimiters = "[]();\"";
 
 bool isDelim(String c) {
@@ -15,13 +17,24 @@ String camelize(String input) {
 final _validIdentifierCharsRegex = RegExp("[a-zA-Z0-9]");
 
 String escapeInvalidChars(String input) {
+  // If the identifier only consists of underscores we let it through so you can
+  // for example ignore the name of a parameter by naming it '_'
+  if (input.split("").every((c) => c == "_")) return input;
+
   return input.splitMapJoin(
     _validIdentifierCharsRegex,
-    onNonMatch: (c) {
-      if (c.isEmpty) return "";
+    onNonMatch: (chars) {
+      if (chars.isEmpty) return "";
 
-      print("ESCAPE INVALID CHARS C: '$c'");
-      return "\$\$${c.runes.first}\$\$";
+      return chars
+          .split("")
+          .fold(
+            "",
+            (acc, c) =>
+                moduleOrObjectSeparators.contains(c)
+                    ? "$acc."
+                    : "$acc\$\$${c.runes.first}\$\$",
+          );
     },
   );
 }

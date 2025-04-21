@@ -4,3 +4,4 @@
 *.exe
 build
 .vscode
+bliss_build

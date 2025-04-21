@@ -1,12 +1,5 @@
-(def main
-	(def print+? [val +amount]
-		(print (+ val +amount)))
+(let lst [0 1 2 3 6])
+(print lst)
 
-	(letm x 5)
-	(print+? x 20)
-	(set x (+ x 5))
-	(print+? x 10))
-
-;main(...) {
-	...
-};
+(let incremented-lst (#map lst (fn [x] (+ x 1))))
+(print incremented-lst)

@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:bliss/compiler/errors.dart';
-import 'package:bliss/functions/compile.dart';
+import 'package:bliss/functions/generate.dart';
 
-class CompileCmd extends Command {
+class GenerateCmd extends Command {
   @override
-  final name = "compile";
+  final name = "generate";
   @override
-  final description = "Compile a .bliss file into a native executable.";
+  final description = "Generate Dart code from a .bliss file.";
 
-  CompileCmd() {
+  GenerateCmd() {
     argParser.addFlag(
       "force",
       abbr: "f",
@@ -37,7 +37,7 @@ class CompileCmd extends Command {
         );
       }
 
-      await compile(inputFileName);
+      generate(inputFileName);
     } catch (e) {
       print("Error during compilation:");
       rethrow;
