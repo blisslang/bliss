@@ -4,8 +4,11 @@ import 'package:bliss/constants.dart';
 import 'package:bliss/functions/generate.dart';
 import 'package:cli_spin/cli_spin.dart';
 
-Future<void> compile(String inputFileName) async {
-  final (dartOutputFileName, exeOutputFileName) = generate(inputFileName);
+Future<void> compile(String inputFileName, {bool noStdlib = false}) async {
+  final (dartOutputFileName, exeOutputFileName) = generate(
+    inputFileName,
+    noStdlib: noStdlib,
+  );
 
   print("==> Compiling: $dartOutputFileName -> $exeOutputFileName");
 

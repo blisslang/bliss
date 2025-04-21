@@ -11,12 +11,18 @@ class CompileCmd extends Command {
   final description = "Compile a .bliss file into a native executable.";
 
   CompileCmd() {
-    argParser.addFlag(
-      "force",
-      abbr: "f",
-      help: "Skips all checks. Use with caution.",
-      hideNegatedUsage: true,
-    );
+    argParser
+      ..addFlag(
+        "stdlib",
+        help: "Include the Bliss Standard Library in the compiled code.",
+        defaultsTo: true,
+      )
+      ..addFlag(
+        "force",
+        abbr: "f",
+        help: "Skips all checks. Use with caution.",
+        hideNegatedUsage: true,
+      );
   }
 
   @override
@@ -30,6 +36,7 @@ class CompileCmd extends Command {
 
       final [inputFileName] = argResults!.rest;
       final force = argResults!.flag("force");
+      final useStdlib = argResults!.flag("stdlib");
 
       if (!force && !inputFileName.endsWith(".bliss")) {
         throw InvalidInputFileError(
@@ -37,7 +44,7 @@ class CompileCmd extends Command {
         );
       }
 
-      await compile(inputFileName);
+      await compile(inputFileName, noStdlib: !useStdlib);
     } catch (e) {
       print("Error during compilation:");
       rethrow;

@@ -31,7 +31,7 @@ String escapeInvalidChars(String input) {
           .fold(
             "",
             (acc, c) =>
-                moduleOrObjectSeparators.contains(c)
+                moduleAndObjectSeparators.contains(c)
                     ? "$acc."
                     : "$acc\$\$${c.runes.first}\$\$",
           );

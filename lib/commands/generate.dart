@@ -11,12 +11,18 @@ class GenerateCmd extends Command {
   final description = "Generate Dart code from a .bliss file.";
 
   GenerateCmd() {
-    argParser.addFlag(
-      "force",
-      abbr: "f",
-      help: "Skips all checks. Use with caution.",
-      hideNegatedUsage: true,
-    );
+    argParser
+      ..addFlag(
+        "stdlib",
+        help: "Include the Bliss Standard Library in the compiled code.",
+        defaultsTo: true,
+      )
+      ..addFlag(
+        "force",
+        abbr: "f",
+        help: "Skips all checks. Use with caution.",
+        hideNegatedUsage: true,
+      );
   }
 
   @override
@@ -30,6 +36,7 @@ class GenerateCmd extends Command {
 
       final [inputFileName] = argResults!.rest;
       final force = argResults!.flag("force");
+      final useStdlib = argResults!.flag("stdlib");
 
       if (!force && !inputFileName.endsWith(".bliss")) {
         throw InvalidInputFileError(
@@ -37,7 +44,7 @@ class GenerateCmd extends Command {
         );
       }
 
-      generate(inputFileName);
+      generate(inputFileName, noStdlib: !useStdlib);
     } catch (e) {
       print("Error during compilation:");
       rethrow;

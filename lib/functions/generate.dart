@@ -4,9 +4,10 @@ import 'package:bliss/compiler/categorizer.dart';
 import 'package:bliss/compiler/emitter.dart';
 import 'package:bliss/compiler/tokenizer.dart';
 import 'package:bliss/constants.dart';
+import 'package:bliss/functions/stdlib.dart';
 import 'package:cli_spin/cli_spin.dart';
 
-(String, String) generate(String inputFileName) {
+(String, String) generate(String inputFileName, {bool noStdlib = false}) {
   final contents = File(inputFileName).readAsStringSync();
 
   final lastDotIdx = inputFileName.lastIndexOf(".");
@@ -35,18 +36,16 @@ import 'package:cli_spin/cli_spin.dart';
   final emitter = Emitter();
   final emittedCode = emitter.emit(ast);
 
-  // print("\n\n===== AST: =====");
-  // print(ast.format());
+  final compiledStdlib =
+      noStdlib
+          ? ""
+          : "//BEGIN Bliss stdlib\n${compileStdlib()}//END Bliss stdlib\n\n";
 
-  // print("\n\n===== EMITTED DART CODE: =====");
-  // print(emittedCode);
-
-  // print("\n\n===== RUNNING EMITTED CODE: =====");
-  // await Isolate.spawnUri(Uri.dataFromString(emittedCode), [], null);
+  final codeWithStdlib = "$compiledStdlib$emittedCode";
 
   File(dartOutputFileName)
     ..createSync(recursive: true)
-    ..writeAsStringSync(emittedCode);
+    ..writeAsStringSync(codeWithStdlib);
 
   spinner.success(
     "Generated Dart code: $colorCyan$dartOutputFileName$colorReset",

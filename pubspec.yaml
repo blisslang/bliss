@@ -1,17 +1,30 @@
 name: bliss
-description: A sample command-line application with basic argument parsing.
+description: The compiler and toolchain for the Bliss Programming Language.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
 
 environment:
   sdk: ^3.7.3
 
-# Add regular dependencies here.
+scripts:
+  prebuild:
+    - mkdir -p build
+  build:
+    - dart run build_runner build --delete-conflicting-outputs
+    - dart compile exe bin/bliss.dart -o build/bliss.exe
+
+  prebliss:
+    - dart run build_runner build
+  bliss:
+    - dart run bliss
+
 dependencies:
   args: ^2.5.0
   cli_spin: ^1.0.1
   dart_style: ^3.0.1
+  embed_annotation: ^1.2.2
   pub_semver: ^2.2.0
 
 dev_dependencies:
   lints: ^5.0.0
+  embed: ^1.4.1
+  build_runner: ^2.4.15

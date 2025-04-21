@@ -22,7 +22,7 @@ const _operators = {
   "or": "||",
 };
 
-const moduleOrObjectSeparators = {"#", "@"};
+const moduleAndObjectSeparators = {"#", "@"};
 
 const _specialFormsNotTerminatedWithSemicolons = {
   "mod",
@@ -132,6 +132,8 @@ class Emitter {
 
   String _emitReturn(List<Node> nodes) {
     switch (nodes) {
+      case []:
+        return "return";
       case [final Node returnNode]:
         final exprStr = _emitExpr(returnNode);
         return "return $exprStr";
@@ -258,6 +260,22 @@ class Emitter {
     }
   }
 
+  String _emitIndexing(List<Node> nodes, {bool set = false}) {
+    switch (nodes) {
+      case [final Node collection, final Node at]:
+        final collectionStr = _emitExpr(collection);
+        final atStr = _emitExpr(at);
+        return "$collectionStr[$atStr]";
+      case [final Node collection, final Node at, final Node value]:
+        final collectionStr = _emitExpr(collection);
+        final atStr = _emitExpr(at);
+        final valueStr = _emitExpr(value);
+        return "$collectionStr[$atStr] = $valueStr";
+      default:
+        throw "Invalid indexing $nodes";
+    }
+  }
+
   String _emitOperator(String op, List<Node> nodes) {
     switch ([_operators[op], nodes]) {
       case [null, _]:
@@ -273,8 +291,8 @@ class Emitter {
 
   String _emitMethodCall(SymbolNode name, List<Node> nodes) {
     switch (nodes) {
-      case [final SymbolNode object, ...final args]:
-        final objectStr = _emitSymbol(object);
+      case [final Node object, ...final args]:
+        final objectStr = _emitExpr(object);
         final nameStr = _emitSymbol(name);
         final argsStr = _emitCommaSeparatedItems(args);
         return "$objectStr$nameStr($argsStr)";
@@ -283,7 +301,7 @@ class Emitter {
     }
   }
 
-  String _emitPropertyUse(SymbolNode name, List<Node> nodes) {
+  String _emitPropertyAccess(SymbolNode name, List<Node> nodes) {
     switch (nodes) {
       case [final SymbolNode object]:
         final objectStr = _emitSymbol(object);
@@ -355,12 +373,16 @@ class Emitter {
           "cond" => _emitCondStatement(nodes),
           // (not false)
           "not" => _emitNegation(nodes),
+          // (cget lst 0) (get using indexing)
+          "cget" => _emitIndexing(nodes),
+          // (cset lst 0 5) (set using indexing)
+          "cset" => _emitIndexing(nodes, set: true),
           // (+ x y)
           _ when _operators.containsKey(id) => _emitOperator(id, nodes),
           // (#for-each lst print) (calls for-each as a method on lst, the first argument)
           _ when id.startsWith("#") => _emitMethodCall(idNode, nodes),
           // (@is-even i) / (set (@length lst) lst 1) ()
-          _ when id.startsWith("@") => _emitPropertyUse(idNode, nodes),
+          _ when id.startsWith("@") => _emitPropertyAccess(idNode, nodes),
           // anything else (not a keyword)
           _ => _emitFunctionCall(idNode, nodes),
         };
@@ -379,11 +401,11 @@ class Emitter {
     };
   }
 
-  String emit(Node ast) {
+  String emit(Node ast, {bool noMain = false}) {
     final formatter = DartFormatter(languageVersion: Version(3, 7, 3));
 
     final emittedCode = _emitStatementBody(
-      _hasExplicitMainFunction(ast.contents)
+      noMain || _hasExplicitMainFunction(ast.contents)
           ? ast.contents
           : [
             ListNode([SymbolNode("def"), SymbolNode("main"), ...ast.contents]),

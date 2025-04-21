@@ -1,0 +1,6 @@
+; Collections ;
+
+(def cswap [lst i1 i2]
+  (let temp (cget lst i1))
+  (cset lst i1 (cget lst i2))
+  (cset lst i2 temp))
