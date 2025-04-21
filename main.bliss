@@ -16,7 +16,8 @@
 
   (when (> swaps 0) (bubble-sort lst)))
 
-(let nums [10 8 3 7 2 1 4 6 5 9])
-(print nums)
-(bubble-sort nums)
-(print nums)
+(def main
+  (let nums [10 8 3 7 2 1 4 6 5 9])
+  (print nums)
+  (bubble-sort nums)
+  (print nums))

@@ -1,3 +1,4 @@
+import 'package:bliss/compiler/macro_expander.dart';
 import 'package:bliss/compiler/node.dart';
 import 'package:bliss/utils.dart';
 import 'package:dart_style/dart_style.dart';
@@ -87,14 +88,14 @@ class Emitter {
       required List<Node> bodyNodes,
     }) {
       switch (bodyNodes) {
-        case [final Node bodyNode]
-            when bodyNode.contents is! List ||
-                bodyNode.contents[0].contents != "ret":
-          final nameStr =
-              name != null ? _emitSymbol(name, private: private) : "";
-          final argsStr = args != null ? _emitCommaSeparatedItems(args) : "";
-          final bodyStr = _emitExpr(bodyNode);
-          return "$nameStr($argsStr) => $bodyStr${!lambda ? ";" : ""}";
+        // case [final Node bodyNode]
+        //     when bodyNode.contents is! List ||
+        //         bodyNode.contents[0].contents != "ret":
+        //   final nameStr =
+        //       name != null ? _emitSymbol(name, private: private) : "";
+        //   final argsStr = args != null ? _emitCommaSeparatedItems(args) : "";
+        //   final bodyStr = _emitExpr(bodyNode);
+        //   return "$nameStr($argsStr) => $bodyStr${!lambda ? ";" : ""}";
         default:
           final nameStr =
               name != null ? _emitSymbol(name, private: private) : "";
@@ -401,14 +402,21 @@ class Emitter {
     };
   }
 
-  String emit(Node ast, {bool noMain = false}) {
+  String emit(Node ast, {Node? stdlibAst}) {
     final formatter = DartFormatter(languageVersion: Version(3, 7, 3));
 
+    final astWithStdlib =
+        stdlibAst != null
+            ? (stdlibAst.contents as List<Node>) + (ast.contents as List<Node>)
+            : ast.contents as List<Node>;
+
+    final expandedAst = MacroExpander().expand(astWithStdlib);
+
     final emittedCode = _emitStatementBody(
-      noMain || _hasExplicitMainFunction(ast.contents)
-          ? ast.contents
+      _hasExplicitMainFunction(ast.contents)
+          ? expandedAst
           : [
-            ListNode([SymbolNode("def"), SymbolNode("main"), ...ast.contents]),
+            ListNode([SymbolNode("def"), SymbolNode("main"), ...expandedAst]),
           ],
     );
 

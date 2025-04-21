@@ -28,20 +28,14 @@ import 'package:cli_spin/cli_spin.dart';
 
   spinner.text = "Parsing tokens...";
 
-  final categorizer = Categorizer();
-  final ast = categorizer.categorize(tokens);
+  final stdlibAst = noStdlib ? null : generateStdlibAst();
+  final ast = Categorizer().categorize(tokens);
 
   spinner.text = "Emitting Dart...";
 
-  final emitter = Emitter();
-  final emittedCode = emitter.emit(ast);
+  final emittedCode = Emitter().emit(ast, stdlibAst: stdlibAst);
 
-  final compiledStdlib =
-      noStdlib
-          ? ""
-          : "//BEGIN Bliss stdlib\n${compileStdlib()}//END Bliss stdlib\n\n";
-
-  final codeWithStdlib = "$compiledStdlib$emittedCode";
+  final codeWithStdlib = emittedCode;
 
   File(dartOutputFileName)
     ..createSync(recursive: true)

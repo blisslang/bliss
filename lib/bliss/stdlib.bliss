@@ -1,5 +1,15 @@
 ; Collections ;
 
+(defmacro unless [predicate then-body else-body]
+  (if (not predicate)
+    then-body
+    else-body))
+
+(def test
+  (unless true
+    (ret false)
+    (ret true)))
+
 (def cswap [lst i1 i2]
   (let temp (cget lst i1))
   (cset lst i1 (cget lst i2))
