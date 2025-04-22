@@ -5,33 +5,26 @@ import 'package:dart_style/dart_style.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 const _operators = {
+  /* Math */
   "+": "+",
   "-": "-",
   "*": "*",
   "/": "/",
-  "set+": "+=",
-  "set-": "-=",
-  "set*": "*=",
-  "set/": "/=",
+  /* Equality */
   "<": "<",
   "<=": "<=",
   ">": ">",
   ">=": ">=",
-  "=": "=",
+  "=": "==",
   "not=": "!=",
+  /* Logical */
   "and": "&&",
   "or": "||",
 };
 
 const moduleAndObjectSeparators = {"#", "@"};
 
-const _specialFormsNotTerminatedWithSemicolons = {
-  "mod",
-  "def",
-  "if",
-  "when",
-  "cond",
-};
+const _specialFormsNotTerminatedWithSemicolons = {"mod", "def", "cond", "do"};
 
 class Emitter {
   /*================================== Data ==================================*/
@@ -173,25 +166,6 @@ class Emitter {
     }
   }
 
-  String _emitIfStatement(List<Node> nodes, {bool elze = true}) {
-    switch (nodes) {
-      // (if true ... ...) (with both if and else branches required and only one expr in branches)
-      case [final Node predicate, final Node ifBranch, final Node elseBranch]
-          when elze:
-        final predicateStr = _emitExpr(predicate);
-        final ifBranchStr = _emitStatementBody([ifBranch]);
-        final elseBranchStr = _emitStatementBody([elseBranch]);
-        return "if ($predicateStr) {\n$ifBranchStr\n} else {\n$elseBranchStr\n}";
-      // (when true ...) (with only if branch and multiple exprs allowed in if branch)
-      case [final Node predicate, ...final ifBranch]:
-        final predicateStr = _emitExpr(predicate);
-        final ifBranchStr = _emitStatementBody(ifBranch);
-        return "if ($predicateStr) {\n$ifBranchStr\n}";
-      default:
-        throw "Invalid if/when statement $nodes";
-    }
-  }
-
   String _emitCondStatement(List<Node> nodes) {
     bool throwIfAnyIfBranchIsNotCorrect(List<Node> branches) {
       for (var branch in branches) {
@@ -259,6 +233,11 @@ class Emitter {
       default:
         throw "Invalid negation: $nodes";
     }
+  }
+
+  String _emitDoBlock(List<Node> nodes) {
+    final blockStr = _emitStatementBody(nodes);
+    return blockStr;
   }
 
   String _emitIndexing(List<Node> nodes, {bool set = false}) {
@@ -366,14 +345,12 @@ class Emitter {
           "ret" => _emitReturn(nodes),
           // (set y 8)
           "set" => _emitVariableMutation(nodes),
-          // (if (< n 2) ... ...)
-          "if" => _emitIfStatement(nodes, elze: true),
-          // (when (not= x 5) ...)
-          "when" => _emitIfStatement(nodes, elze: false),
           // (cond ((x > 5) ... ...) ((true) ... ...) (else ...))
           "cond" => _emitCondStatement(nodes),
           // (not false)
           "not" => _emitNegation(nodes),
+          // (do ... ... ...) (groups multiple exprs together for use in (if ... ...) etc.)
+          "do" => _emitDoBlock(nodes),
           // (cget lst 0) (get using indexing)
           "cget" => _emitIndexing(nodes),
           // (cset lst 0 5) (set using indexing)
@@ -424,6 +401,9 @@ class Emitter {
       return formatter.format(emittedCode);
     } on ArgumentError catch (e) {
       print("Error while formatting: ${e.message}");
+      return emittedCode;
+    } on FormatterException catch (e) {
+      print("Error while formatting: ${e.message(color: true)}");
       return emittedCode;
     }
   }

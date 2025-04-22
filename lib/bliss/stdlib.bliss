@@ -1,14 +1,21 @@
+; Macros ;
+
+(defmacro if [pred thenb elseb]
+  (cond (pred thenb)
+        (else elseb)))
+
+(defmacro when [pred thenb]
+  (cond (pred thenb)))
+
+(defmacro unless [pred unlessb]
+  (when (not pred) unlessb))
+
+(defmacro set+ [var n] (set var (+ var n)))
+(defmacro set- [var n] (set var (- var n)))
+(defmacro set* [var n] (set var (* var n)))
+(defmacro set/ [var n] (set var (/ var n)))
+
 ; Collections ;
-
-(defmacro unless [predicate then-body else-body]
-  (if (not predicate)
-    then-body
-    else-body))
-
-(def test
-  (unless true
-    (ret false)
-    (ret true)))
 
 (def cswap [lst i1 i2]
   (let temp (cget lst i1))

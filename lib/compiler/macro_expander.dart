@@ -57,29 +57,32 @@ class MacroExpander {
       List<String> replacementArgs,
       List<Node> bodyNodes,
     ) {
-      for (final (i, macroBodyNode) in bodyNodes.indexed) {
+      return bodyNodes.map((macroBodyNode) {
         switch (macroBodyNode) {
           case SymbolNode(contents: final String name)
               when replacementArgs.contains(name):
             final replacementIdx = replacementArgs.indexOf(name);
-            final replacementNode = args[replacementIdx];
-            bodyNodes[i] = replacementNode;
-          case ListNode() || ValueListNode():
-            macroBodyNode.contents = expandMacroUsage(
+            return args[replacementIdx];
+          case ListNode(contents: final List<Node> contents):
+            final expandedContents = expandMacroUsage(
               name,
               args,
               replacementArgs,
-              macroBodyNode.contents,
+              contents,
             );
+            return ListNode(expandedContents);
+          case ValueListNode(contents: final List<Node> contents):
+            final expandedContents = expandMacroUsage(
+              name,
+              args,
+              replacementArgs,
+              contents,
+            );
+            return ValueListNode(expandedContents);
           default:
-            null;
+            return macroBodyNode;
         }
-      }
-
-      return switch (bodyNodes) {
-        [ListNode(contents: final innerBodyNodes)] => innerBodyNodes,
-        _ => bodyNodes,
-      };
+      }).toList();
     }
 
     for (final node in nodes) {
@@ -98,7 +101,13 @@ class MacroExpander {
             macroDefinition.replacementArgs,
             macroDefinition.bodyNodes,
           );
-          node.contents = expandedBodyNodes;
+
+          if (macroDefinition.bodyNodes.length == 1 &&
+              macroDefinition.bodyNodes[0] is ListNode) {
+            node.contents = (expandedBodyNodes[0] as ListNode).contents;
+          } else {
+            node.contents = expandedBodyNodes;
+          }
         case ListNode() || ValueListNode():
           _expandMacroUsages(node.contents);
         default:
