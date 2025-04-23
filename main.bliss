@@ -1,14 +1,7 @@
-(def palindrome? [lst]
-  (cond ((<= (@length lst) 1)
-          (ret true))
-        ((not= (@first lst) (@last lst))
-          (ret false))
-        (else
-          (ret (palindrome? (#sublist lst 1 (- (@length lst) 1)))))))
-
-(def main
-  (print (palindrome? []))
-  (print (palindrome? [1]))
-  (print (palindrome? [1 2 3 2 1]))
-  (print (palindrome? [1 2 3 4 5]))
-  (print (palindrome? [1 2 2 1])))
+(def target-indices [nums target]
+  (#sort nums)
+  (ret (#fold (@indexed nums) []
+         (fn [acc x]
+           (if (= (@$2 x) target)
+               (ret (+ acc [(@$1 x)]))
+               (ret acc))))))

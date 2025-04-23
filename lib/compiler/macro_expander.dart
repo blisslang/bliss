@@ -51,68 +51,88 @@ class MacroExpander {
   }
 
   void _expandMacroUsages(List<Node> nodes) {
-    List<Node> expandMacroUsage(
+    (List<Node>, bool) expandMacroUsage(
       String name,
       List<Node> args,
       List<String> replacementArgs,
       List<Node> bodyNodes,
     ) {
-      return bodyNodes.map((macroBodyNode) {
-        switch (macroBodyNode) {
-          case SymbolNode(contents: final String name)
-              when replacementArgs.contains(name):
-            final replacementIdx = replacementArgs.indexOf(name);
-            return args[replacementIdx];
-          case ListNode(contents: final List<Node> contents):
-            final expandedContents = expandMacroUsage(
-              name,
-              args,
-              replacementArgs,
-              contents,
-            );
-            return ListNode(expandedContents);
-          case ValueListNode(contents: final List<Node> contents):
-            final expandedContents = expandMacroUsage(
-              name,
-              args,
-              replacementArgs,
-              contents,
-            );
-            return ValueListNode(expandedContents);
-          default:
-            return macroBodyNode;
-        }
-      }).toList();
+      var hasExpanded = false;
+
+      final expandedBodyNodes =
+          bodyNodes.map((macroBodyNode) {
+            switch (macroBodyNode) {
+              // An expansion is happening
+              case SymbolNode(contents: final String name)
+                  when replacementArgs.contains(name):
+                hasExpanded = true;
+
+                final replacementIdx = replacementArgs.indexOf(name);
+                return args[replacementIdx];
+              // We have a list so we need to go deeper
+              case ListNode(contents: final List<Node> contents):
+                final (
+                  expandedContents,
+                  didExpandInInnerList,
+                ) = expandMacroUsage(name, args, replacementArgs, contents);
+
+                if (!hasExpanded && didExpandInInnerList) hasExpanded = true;
+
+                return ListNode(expandedContents);
+              // We have a value list so we need to go deeper
+              case ValueListNode(contents: final List<Node> contents):
+                final (
+                  expandedContents,
+                  didExpandInInnerList,
+                ) = expandMacroUsage(name, args, replacementArgs, contents);
+
+                if (!hasExpanded && didExpandInInnerList) hasExpanded = true;
+
+                return ValueListNode(expandedContents);
+              // No match found, we dont do anything
+              default:
+                return macroBodyNode;
+            }
+          }).toList();
+
+      return (expandedBodyNodes, hasExpanded);
     }
 
     for (final node in nodes) {
-      switch (node) {
-        case ListNode(
-              contents: [
-                SymbolNode(contents: final name),
-                ...final List<Node> args,
-              ],
-            )
-            when _macroDefinitions.containsKey(name):
-          final macroDefinition = _macroDefinitions[name]!;
-          final expandedBodyNodes = expandMacroUsage(
-            name,
-            args,
-            macroDefinition.replacementArgs,
-            macroDefinition.bodyNodes,
-          );
+      var didExpandInLastAttempt = false;
 
-          if (macroDefinition.bodyNodes.length == 1 &&
-              macroDefinition.bodyNodes[0] is ListNode) {
-            node.contents = (expandedBodyNodes[0] as ListNode).contents;
-          } else {
-            node.contents = expandedBodyNodes;
-          }
-        case ListNode() || ValueListNode():
-          _expandMacroUsages(node.contents);
-        default:
-          null;
-      }
+      do {
+        didExpandInLastAttempt = false;
+
+        switch (node) {
+          case ListNode(
+                contents: [
+                  SymbolNode(contents: final name),
+                  ...final List<Node> args,
+                ],
+              )
+              when _macroDefinitions.containsKey(name):
+            final macroDefinition = _macroDefinitions[name]!;
+            final (expandedBodyNodes, didExpandInAttempt) = expandMacroUsage(
+              name,
+              args,
+              macroDefinition.replacementArgs,
+              macroDefinition.bodyNodes,
+            );
+
+            didExpandInLastAttempt = didExpandInAttempt;
+
+            if (macroDefinition.bodyNodes.length == 1 &&
+                macroDefinition.bodyNodes[0] is ListNode) {
+              node.contents = (expandedBodyNodes[0] as ListNode).contents;
+            } else {
+              node.contents = expandedBodyNodes;
+            }
+          case ListNode() || ValueListNode():
+            _expandMacroUsages(node.contents);
+          default:
+        }
+      } while (didExpandInLastAttempt);
     }
   }
 

@@ -283,8 +283,8 @@ class Emitter {
 
   String _emitPropertyAccess(SymbolNode name, List<Node> nodes) {
     switch (nodes) {
-      case [final SymbolNode object]:
-        final objectStr = _emitSymbol(object);
+      case [final Node object]:
+        final objectStr = _emitExpr(object);
         final nameStr = _emitSymbol(name);
         return "$objectStr$nameStr";
       default:

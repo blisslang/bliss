@@ -14,7 +14,7 @@ String camelize(String input) {
   }).join();
 }
 
-final _validIdentifierCharsRegex = RegExp("[a-zA-Z0-9]");
+final _validIdentifierCharsRegex = RegExp("[a-zA-Z0-9\$]");
 
 String escapeInvalidChars(String input) {
   // If the identifier only consists of underscores we let it through so you can
