@@ -6,15 +6,16 @@ bool isDelim(String c) {
   return _delimiters.contains(c);
 }
 
-String camelize(String input) {
-  return input.split("-").indexed.map((elem) {
-    return elem.$1 > 0
-        ? "${elem.$2[0].toUpperCase()}${elem.$2.substring(1)}"
-        : elem.$2;
-  }).join();
+String snakeCasify(String input) {
+  return input.replaceAll("-", "_");
+  // return input.split("-").indexed.map((elem) {
+  //   return elem.$1 > 0
+  //       ? "${elem.$2[0].toUpperCase()}${elem.$2.substring(1)}"
+  //       : elem.$2;
+  // }).join();
 }
 
-final _validIdentifierCharsRegex = RegExp("[a-zA-Z0-9\$]");
+final _validIdentifierCharsRegex = RegExp("[a-zA-Z0-9_]");
 
 String escapeInvalidChars(String input) {
   // If the identifier only consists of underscores we let it through so you can
@@ -31,9 +32,7 @@ String escapeInvalidChars(String input) {
           .fold(
             "",
             (acc, c) =>
-                moduleAndObjectSeparators.contains(c)
-                    ? "$acc."
-                    : "$acc\$\$${c.runes.first}\$\$",
+                moduleSeparator == c ? "$acc." : "${acc}__${c.runes.first}__",
           );
     },
   );

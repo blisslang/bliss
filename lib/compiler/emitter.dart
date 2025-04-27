@@ -1,8 +1,6 @@
 import 'package:bliss/compiler/macro_expander.dart';
 import 'package:bliss/compiler/node.dart';
 import 'package:bliss/utils.dart';
-import 'package:dart_style/dart_style.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 const _operators = {
   /* Math */
@@ -22,9 +20,9 @@ const _operators = {
   "or": "||",
 };
 
-const moduleAndObjectSeparators = {"#", "@"};
+const moduleSeparator = "#";
 
-const _specialFormsNotTerminatedWithSemicolons = {"mod", "def", "cond", "do"};
+const Set<String> _specialFormsNotTerminatedWithSemicolons = {};
 
 class Emitter {
   /*================================== Data ==================================*/
@@ -52,21 +50,29 @@ class Emitter {
         .join("\n");
   }
 
-  bool _hasExplicitMainFunction(List<Node> nodes) {
-    return nodes.any(
-      (node) => switch (node) {
-        ListNode(
-          contents: [
-            SymbolNode(contents: "def"),
-            SymbolNode(contents: "main"),
-            ...,
-          ],
-        ) =>
-          true,
-        _ => false,
-      },
-    );
-  }
+  // List<Node> _maybeWrapWithMainFunction(List<Node> nodes) {
+  //   return _hasExplicitMainFunction(nodes)
+  //       ? nodes
+  //       : [
+  //         ListNode([SymbolNode("def"), SymbolNode("main"), ...nodes]),
+  //       ];
+  // }
+
+  // bool _hasExplicitMainFunction(List<Node> nodes) {
+  //   return nodes.any(
+  //     (node) => switch (node) {
+  //       ListNode(
+  //         contents: [
+  //           SymbolNode(contents: "def"),
+  //           SymbolNode(contents: "main"),
+  //           ...,
+  //         ],
+  //       ) =>
+  //         true,
+  //       _ => false,
+  //     },
+  //   );
+  // }
 
   /*==================== Special form (keyword) emissions ====================*/
 
@@ -94,7 +100,8 @@ class Emitter {
               name != null ? _emitSymbol(name, private: private) : "";
           final argsStr = args != null ? _emitCommaSeparatedItems(args) : "";
           final bodyStr = _emitStatementBody(bodyNodes);
-          return "$nameStr($argsStr) {\n$bodyStr\n}";
+          final keywordStr = !lambda ? "let $nameStr = " : "";
+          return "$keywordStr($argsStr) => {\n$bodyStr\n}";
       }
     }
 
@@ -124,20 +131,20 @@ class Emitter {
     };
   }
 
-  String _emitReturn(List<Node> nodes) {
-    switch (nodes) {
-      case []:
-        return "return";
-      case [final Node returnNode]:
-        final exprStr = _emitExpr(returnNode);
-        return "return $exprStr";
-      case [...final returnNodes] when nodes.isNotEmpty:
-        final exprsStr = _emitCommaSeparatedItems(returnNodes);
-        return "return ($exprsStr)";
-      default:
-        throw "Invalid return $nodes";
-    }
-  }
+  // String _emitReturn(List<Node> nodes) {
+  //   switch (nodes) {
+  //     case []:
+  //       return "return";
+  //     case [final Node returnNode]:
+  //       final exprStr = _emitExpr(returnNode);
+  //       return "return $exprStr";
+  //     case [...final returnNodes] when nodes.isNotEmpty:
+  //       final exprsStr = _emitCommaSeparatedItems(returnNodes);
+  //       return "return ($exprsStr)";
+  //     default:
+  //       throw "Invalid return $nodes";
+  //   }
+  // }
 
   String _emitVariable(
     List<Node> nodes, {
@@ -146,10 +153,10 @@ class Emitter {
   }) {
     switch (nodes) {
       case [final SymbolNode name, final value]:
-        final keywordStr = mutable ? "var" : "final";
         final nameStr = _emitSymbol(name, private: private);
         final valueStr = _emitExpr(value);
-        return "$keywordStr $nameStr = $valueStr";
+        final maybeMutableValueStr = mutable ? "ref($valueStr)" : valueStr;
+        return "let $nameStr = $maybeMutableValueStr";
       default:
         throw "Invalid variable declaration $nodes";
     }
@@ -158,9 +165,24 @@ class Emitter {
   String _emitVariableMutation(List<Node> nodes) {
     switch (nodes) {
       case [final name, final value]:
+        void addCaretToVariableNameInValue(List<Node> valueNodes, String name) {
+          for (final node in valueNodes) {
+            switch (node) {
+              case ListNode(contents: final nodes) ||
+                  ValueListNode(contents: final nodes):
+                addCaretToVariableNameInValue(nodes, name);
+              case SymbolNode(contents: final String str) when str == name:
+                value.contents = "$str^";
+              default:
+                null;
+            }
+          }
+        }
+
         final nameStr = _emitExpr(name);
+        addCaretToVariableNameInValue([value], nameStr);
         final valueStr = _emitExpr(value);
-        return "$nameStr = $valueStr";
+        return "$nameStr := $valueStr";
       default:
         throw "Invalid variable mutation $nodes";
     }
@@ -240,21 +262,21 @@ class Emitter {
     return blockStr;
   }
 
-  String _emitIndexing(List<Node> nodes, {bool set = false}) {
-    switch (nodes) {
-      case [final Node collection, final Node at]:
-        final collectionStr = _emitExpr(collection);
-        final atStr = _emitExpr(at);
-        return "$collectionStr[$atStr]";
-      case [final Node collection, final Node at, final Node value]:
-        final collectionStr = _emitExpr(collection);
-        final atStr = _emitExpr(at);
-        final valueStr = _emitExpr(value);
-        return "$collectionStr[$atStr] = $valueStr";
-      default:
-        throw "Invalid indexing $nodes";
-    }
-  }
+  // String _emitIndexing(List<Node> nodes, {bool set = false}) {
+  //   switch (nodes) {
+  //     case [final Node collection, final Node at]:
+  //       final collectionStr = _emitExpr(collection);
+  //       final atStr = _emitExpr(at);
+  //       return "$collectionStr[$atStr]";
+  //     case [final Node collection, final Node at, final Node value]:
+  //       final collectionStr = _emitExpr(collection);
+  //       final atStr = _emitExpr(at);
+  //       final valueStr = _emitExpr(value);
+  //       return "$collectionStr[$atStr] = $valueStr";
+  //     default:
+  //       throw "Invalid indexing $nodes";
+  //   }
+  // }
 
   String _emitOperator(String op, List<Node> nodes) {
     switch ([_operators[op], nodes]) {
@@ -269,17 +291,17 @@ class Emitter {
     }
   }
 
-  String _emitMethodCall(SymbolNode name, List<Node> nodes) {
-    switch (nodes) {
-      case [final Node object, ...final args]:
-        final objectStr = _emitExpr(object);
-        final nameStr = _emitSymbol(name);
-        final argsStr = _emitCommaSeparatedItems(args);
-        return "$objectStr$nameStr($argsStr)";
-      default:
-        throw "Invalid method call: $name $nodes";
-    }
-  }
+  // String _emitMethodCall(SymbolNode name, List<Node> nodes) {
+  //   switch (nodes) {
+  //     case [final Node object, ...final args]:
+  //       final objectStr = _emitExpr(object);
+  //       final nameStr = _emitSymbol(name);
+  //       final argsStr = _emitCommaSeparatedItems(args);
+  //       return "$objectStr$nameStr($argsStr)";
+  //     default:
+  //       throw "Invalid method call: $name $nodes";
+  //   }
+  // }
 
   String _emitPropertyAccess(SymbolNode name, List<Node> nodes) {
     switch (nodes) {
@@ -306,7 +328,7 @@ class Emitter {
 
   String _emitSymbol(SymbolNode symbol, {bool private = false}) {
     final validIndentifier = escapeInvalidChars(
-      camelize(symbol.contents as String),
+      snakeCasify(symbol.contents as String),
     );
     return private ? "_$validIndentifier" : validIndentifier;
   }
@@ -342,7 +364,7 @@ class Emitter {
               private: id.contains("p"),
             ),
           // (ret x)
-          "ret" => _emitReturn(nodes),
+          // "ret" => _emitReturn(nodes),
           // (set y 8)
           "set" => _emitVariableMutation(nodes),
           // (cond ((x > 5) ... ...) ((true) ... ...) (else ...))
@@ -352,13 +374,13 @@ class Emitter {
           // (do ... ... ...) (groups multiple exprs together for use in (if ... ...) etc.)
           "do" => _emitDoBlock(nodes),
           // (cget lst 0) (get using indexing)
-          "cget" => _emitIndexing(nodes),
+          // "cget" => _emitIndexing(nodes),
           // (cset lst 0 5) (set using indexing)
-          "cset" => _emitIndexing(nodes, set: true),
+          // "cset" => _emitIndexing(nodes, set: true),
           // (+ x y)
           _ when _operators.containsKey(id) => _emitOperator(id, nodes),
           // (#for-each lst print) (calls for-each as a method on lst, the first argument)
-          _ when id.startsWith("#") => _emitMethodCall(idNode, nodes),
+          // _ when id.startsWith("#") => _emitMethodCall(idNode, nodes),
           // (@is-even i) / (set (@length lst) lst 1) ()
           _ when id.startsWith("@") => _emitPropertyAccess(idNode, nodes),
           // anything else (not a keyword)
@@ -380,7 +402,7 @@ class Emitter {
   }
 
   String emit(Node ast, {Node? stdlibAst}) {
-    final formatter = DartFormatter(languageVersion: Version(3, 7, 3));
+    // final formatter = DartFormatter(languageVersion: Version(3, 7, 3));
 
     final astWithStdlib =
         stdlibAst != null
@@ -389,22 +411,18 @@ class Emitter {
 
     final expandedAst = MacroExpander().expand(astWithStdlib);
 
-    final emittedCode = _emitStatementBody(
-      _hasExplicitMainFunction(ast.contents)
-          ? expandedAst
-          : [
-            ListNode([SymbolNode("def"), SymbolNode("main"), ...expandedAst]),
-          ],
-    );
+    final ir = _emitStatementBody(expandedAst);
 
-    try {
-      return formatter.format(emittedCode);
-    } on ArgumentError catch (e) {
-      print("Error while formatting: ${e.message}");
-      return emittedCode;
-    } on FormatterException catch (e) {
-      print("Error while formatting: ${e.message(color: true)}");
-      return emittedCode;
-    }
+    return ir;
+
+    // try {
+    //   return formatter.format(emittedCode);
+    // } on ArgumentError catch (e) {
+    //   print("Error while formatting: ${e.message}");
+    //   return emittedCode;
+    // } on FormatterException catch (e) {
+    //   print("Error while formatting: ${e.message(color: true)}");
+    //   return emittedCode;
+    // }
   }
 }
