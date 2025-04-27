@@ -8,16 +8,17 @@ import 'package:bliss/functions/stdlib.dart';
 import 'package:cli_spin/cli_spin.dart';
 
 (String, String) generate(String inputFileName, {bool noStdlib = false}) {
-  final contents = File(inputFileName).readAsStringSync();
+  final inputFile = File(inputFileName);
+  final contents = inputFile.readAsStringSync();
 
   final lastDotIdx = inputFileName.lastIndexOf(".");
   final inputFileNameWithoutExt = inputFileName.substring(0, lastDotIdx);
   final outputFileNameWithoutExt = "$buildDir/$inputFileNameWithoutExt";
 
-  final dartOutputFileName = "$outputFileNameWithoutExt.dart";
+  final irOutputFileName = "$outputFileNameWithoutExt.re";
   final exeOutputFileName = "$outputFileNameWithoutExt.exe";
 
-  print("==> Generating: $inputFileName -> $dartOutputFileName");
+  print("==> Generating: $inputFileName -> $irOutputFileName");
 
   final spinner = CliSpin(spinner: CliSpinners.dots);
   spinner.start();
@@ -37,13 +38,13 @@ import 'package:cli_spin/cli_spin.dart';
 
   final codeWithStdlib = emittedCode;
 
-  File(dartOutputFileName)
+  File(irOutputFileName)
     ..createSync(recursive: true)
     ..writeAsStringSync(codeWithStdlib);
 
   spinner.success(
-    "Generated Dart code: $colorCyan$dartOutputFileName$colorReset",
+    "Generated Dart code: $colorCyan$irOutputFileName$colorReset",
   );
 
-  return (dartOutputFileName, exeOutputFileName);
+  return (irOutputFileName, exeOutputFileName);
 }
