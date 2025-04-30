@@ -15,9 +15,23 @@
 (defmacro set* [var n] (set var (* var n)))
 (defmacro set/ [var n] (set var (/ var n)))
 
-; Collections ;
+; (defmacro -> []) ;
 
-;(def cswap [lst i1 i2]
-  (let temp (cget lst i1))
-  (cset lst i1 (cget lst i2))
-  (cset lst i2 temp));
+(defmod Bliss
+  (defmod List
+    (def swap [lst i j]
+      (let len (List#length lst))
+
+      (cond ((or (< i 0) (< j 0) (>= i len) (>= j len)) (invalid-arg 69))
+            ((= i j) lst)
+            (else (let val-i (List#nth lst i))
+                  (let val-j (List#nth lst j))
+
+                  (use List (sort (cons 0 [1 2 3 4])))
+
+                  (use List)
+
+                  (List#mapi (fn [k el]
+                               (cond ((= k i) val-j)
+                                     ((= k j) val-i)
+                                     (else el))) lst))))))

@@ -1,8 +1,11 @@
 (def target-indices [nums target]
-  (let nums (List#sort nums))
-  (List#rev (List#fold-left
-    (fn [acc i num]
-      (if (= num target)
-          (List#cons i acc)
-          acc))
-    [] (List#with-idx nums))))
+  (def aux [acc i num]
+    (if (= num target)
+        (List#cons i acc)
+        acc))
+
+  (->> nums
+      (List#sort)
+      (List#with-idx)
+      (List#fold aux [])
+      (List#rev)))

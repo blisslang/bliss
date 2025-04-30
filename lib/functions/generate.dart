@@ -7,7 +7,10 @@ import 'package:bliss/constants.dart';
 import 'package:bliss/functions/stdlib.dart';
 import 'package:cli_spin/cli_spin.dart';
 
-(String, String) generate(String inputFileName, {bool noStdlib = false}) {
+Future<(String, String)> generate(
+  String inputFileName, {
+  bool noStdlib = false,
+}) async {
   final inputFile = File(inputFileName);
   final contents = inputFile.readAsStringSync();
 
@@ -34,7 +37,7 @@ import 'package:cli_spin/cli_spin.dart';
 
   spinner.text = "Emitting Dart...";
 
-  final emittedCode = Emitter().emit(ast, stdlibAst: stdlibAst);
+  final emittedCode = await Emitter().emit(ast, stdlibAst: stdlibAst);
 
   final codeWithStdlib = emittedCode;
 

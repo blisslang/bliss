@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:bliss/compiler/emitter.dart';
 
 const _delimiters = "[]();\"";
@@ -8,11 +11,6 @@ bool isDelim(String c) {
 
 String snakeCasify(String input) {
   return input.replaceAll("-", "_");
-  // return input.split("-").indexed.map((elem) {
-  //   return elem.$1 > 0
-  //       ? "${elem.$2[0].toUpperCase()}${elem.$2.substring(1)}"
-  //       : elem.$2;
-  // }).join();
 }
 
 final _validIdentifierCharsRegex = RegExp("[a-zA-Z0-9_]");
@@ -36,4 +34,52 @@ String escapeInvalidChars(String input) {
           );
     },
   );
+}
+
+Future<(String, int)> runCommandWithStdinAndFallbackValueOnError(
+  String command,
+  List<String> args, {
+  List<String>? stdin,
+  required String valueOnError,
+}) async {
+  try {
+    final process = await Process.start(command, args);
+
+    stdin?.forEach(process.stdin.write);
+    await process.stdin.close();
+
+    final futureExitCode = process.exitCode;
+    final futureStdOut = process.stdout.transform(utf8.decoder).join();
+    final futureStdErr = process.stderr.transform(utf8.decoder).join();
+
+    final results = await Future.wait([
+      futureExitCode,
+      futureStdOut,
+      futureStdErr,
+    ]);
+
+    final exitCode = results[0] as int;
+    final stdOutput = results[1] as String;
+    final stdError = results[2] as String;
+
+    if (stdError.isNotEmpty) {
+      print("$command STDERR: $stdError");
+    }
+
+    if (exitCode != 0) {
+      print(
+        "$command failed with exit code $exitCode. Returning original input.",
+      );
+      if (stdOutput.isNotEmpty) {
+        print("$command STDOUT (on failure): $stdOutput");
+      }
+      return (valueOnError, exitCode);
+    }
+
+    print("$command STDOUT (on success): $stdOutput");
+
+    return (stdOutput, exitCode);
+  } on ProcessException {
+    return (valueOnError, exitCode);
+  }
 }

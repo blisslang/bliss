@@ -27,6 +27,38 @@ const Set<String> _specialFormsNotTerminatedWithSemicolons = {};
 class Emitter {
   /*================================== Data ==================================*/
 
+  /*========================= General utilities etc. =========================*/
+
+  Future<String> _tryFormatIr(String ir) async {
+    // Try to format using both refmt and bsrefmt
+
+    final (
+      bsrefmtRes,
+      bsrefmtExitCode,
+    ) = await runCommandWithStdinAndFallbackValueOnError(
+      "bsrefmt",
+      [],
+      valueOnError: ir,
+      stdin: [ir],
+    );
+
+    if (bsrefmtExitCode == 0) return bsrefmtRes;
+
+    final (
+      refmtRres,
+      refmtExitCode,
+    ) = await runCommandWithStdinAndFallbackValueOnError(
+      "refmt",
+      [],
+      valueOnError: ir,
+      stdin: [ir],
+    );
+
+    if (refmtExitCode == 0) return refmtRres;
+
+    return ir;
+  }
+
   /*======================= Helper emission functions ========================*/
 
   String _emitCommaSeparatedItems(List<Node> itemNodes) {
@@ -50,31 +82,35 @@ class Emitter {
         .join("\n");
   }
 
-  // List<Node> _maybeWrapWithMainFunction(List<Node> nodes) {
-  //   return _hasExplicitMainFunction(nodes)
-  //       ? nodes
-  //       : [
-  //         ListNode([SymbolNode("def"), SymbolNode("main"), ...nodes]),
-  //       ];
-  // }
-
-  // bool _hasExplicitMainFunction(List<Node> nodes) {
-  //   return nodes.any(
-  //     (node) => switch (node) {
-  //       ListNode(
-  //         contents: [
-  //           SymbolNode(contents: "def"),
-  //           SymbolNode(contents: "main"),
-  //           ...,
-  //         ],
-  //       ) =>
-  //         true,
-  //       _ => false,
-  //     },
-  //   );
-  // }
-
   /*==================== Special form (keyword) emissions ====================*/
+
+  String _emitModuleDefinition(List<Node> nodes) {
+    switch (nodes) {
+      case [final SymbolNode name, ...final bodyNodes]:
+        final nameStr = _emitSymbol(name);
+        final bodyStr = _emitStatementBody(bodyNodes);
+        return "module $nameStr = {\n$bodyStr\n}";
+      default:
+        throw "Invalid module definition $nodes";
+    }
+  }
+
+  String _emitModuleImport(List<Node> nodes) {
+    switch (nodes) {
+      // (use List (sort (cons 0 [1 2 3])))
+      case [final SymbolNode name, final ListNode bodyNode]:
+        final nameStr = _emitSymbol(name);
+        final bodyStr = _emitList(bodyNode);
+        return "$nameStr.($bodyStr)";
+      // List.(sort(cons(0, [1, 2, 3])))
+      // (use List)
+      case [final SymbolNode name]:
+        final nameStr = _emitSymbol(name);
+        return "open $nameStr";
+      default:
+        throw "Invalid module import $nodes";
+    }
+  }
 
   String _emitFunctionDefinition(
     List<Node> nodes, {
@@ -87,14 +123,6 @@ class Emitter {
       required List<Node> bodyNodes,
     }) {
       switch (bodyNodes) {
-        // case [final Node bodyNode]
-        //     when bodyNode.contents is! List ||
-        //         bodyNode.contents[0].contents != "ret":
-        //   final nameStr =
-        //       name != null ? _emitSymbol(name, private: private) : "";
-        //   final argsStr = args != null ? _emitCommaSeparatedItems(args) : "";
-        //   final bodyStr = _emitExpr(bodyNode);
-        //   return "$nameStr($argsStr) => $bodyStr${!lambda ? ";" : ""}";
         default:
           final nameStr =
               name != null ? _emitSymbol(name, private: private) : "";
@@ -130,21 +158,6 @@ class Emitter {
       _ => throw "Invalid function declaration $nodes",
     };
   }
-
-  // String _emitReturn(List<Node> nodes) {
-  //   switch (nodes) {
-  //     case []:
-  //       return "return";
-  //     case [final Node returnNode]:
-  //       final exprStr = _emitExpr(returnNode);
-  //       return "return $exprStr";
-  //     case [...final returnNodes] when nodes.isNotEmpty:
-  //       final exprsStr = _emitCommaSeparatedItems(returnNodes);
-  //       return "return ($exprsStr)";
-  //     default:
-  //       throw "Invalid return $nodes";
-  //   }
-  // }
 
   String _emitVariable(
     List<Node> nodes, {
@@ -238,6 +251,7 @@ class Emitter {
 
   String _emitNegation(List<Node> nodes) {
     switch (nodes) {
+      // (not (+ 5 3))
       case [
             ListNode(
               contents: [
@@ -249,6 +263,7 @@ class Emitter {
           when _operators.containsKey(op):
         final exprStr = _emitOperator(op, restNodes);
         return "!($exprStr)";
+      // (not false)
       case [final Node negationNode]:
         final exprStr = _emitExpr(negationNode);
         return "!$exprStr";
@@ -262,55 +277,33 @@ class Emitter {
     return blockStr;
   }
 
-  // String _emitIndexing(List<Node> nodes, {bool set = false}) {
-  //   switch (nodes) {
-  //     case [final Node collection, final Node at]:
-  //       final collectionStr = _emitExpr(collection);
-  //       final atStr = _emitExpr(at);
-  //       return "$collectionStr[$atStr]";
-  //     case [final Node collection, final Node at, final Node value]:
-  //       final collectionStr = _emitExpr(collection);
-  //       final atStr = _emitExpr(at);
-  //       final valueStr = _emitExpr(value);
-  //       return "$collectionStr[$atStr] = $valueStr";
-  //     default:
-  //       throw "Invalid indexing $nodes";
-  //   }
-  // }
-
   String _emitOperator(String op, List<Node> nodes) {
-    switch ([_operators[op], nodes]) {
-      case [null, _]:
-        throw "Non-operator used as operator: $op";
-      case [final symbol!, [final lhs!, final rhs!]]:
-        final lhsStr = _emitExpr(lhs as Node);
-        final rhsStr = _emitExpr(rhs as Node);
-        return "$lhsStr $symbol $rhsStr";
-      default:
-        throw "Invalid use of operator: $op";
+    String emitArg(Node arg) {
+      // (+ 5 3)
+      switch (arg) {
+        case ListNode(
+              contents: [
+                SymbolNode(contents: final op as String),
+                ...final restNodes as List<Node>,
+              ],
+            )
+            when _operators.containsKey(op):
+          final exprStr = _emitOperator(op, restNodes);
+          return "($exprStr)";
+        // false
+        case final Node argNode:
+          final exprStr = _emitExpr(argNode);
+          return exprStr;
+      }
     }
-  }
 
-  // String _emitMethodCall(SymbolNode name, List<Node> nodes) {
-  //   switch (nodes) {
-  //     case [final Node object, ...final args]:
-  //       final objectStr = _emitExpr(object);
-  //       final nameStr = _emitSymbol(name);
-  //       final argsStr = _emitCommaSeparatedItems(args);
-  //       return "$objectStr$nameStr($argsStr)";
-  //     default:
-  //       throw "Invalid method call: $name $nodes";
-  //   }
-  // }
-
-  String _emitPropertyAccess(SymbolNode name, List<Node> nodes) {
     switch (nodes) {
-      case [final Node object]:
-        final objectStr = _emitExpr(object);
-        final nameStr = _emitSymbol(name);
-        return "$objectStr$nameStr";
+      case [...final args] when args.length >= 2:
+        final opStr = _operators[op]!;
+        final argsStr = args.map(emitArg).join(" $opStr ");
+        return argsStr;
       default:
-        throw "Invalid property use: $name $nodes";
+        throw "Invalid use of operator $nodes";
     }
   }
 
@@ -350,7 +343,9 @@ class Emitter {
       case [SymbolNode(contents: final id as String), ...final nodes]:
         return switch (id) {
           // (mod IO ...)
-          "mod" => throw UnimplementedError(),
+          "defmod" => _emitModuleDefinition(nodes),
+          // (use IO)
+          "use" => _emitModuleImport(nodes),
           // (def[p] puts [str] ...)
           _ when id.startsWith("def") && id.length >= 3 && id.length <= 4 =>
             _emitFunctionDefinition(nodes, private: id.contains("p")),
@@ -363,8 +358,6 @@ class Emitter {
               mutable: id.contains("m"),
               private: id.contains("p"),
             ),
-          // (ret x)
-          // "ret" => _emitReturn(nodes),
           // (set y 8)
           "set" => _emitVariableMutation(nodes),
           // (cond ((x > 5) ... ...) ((true) ... ...) (else ...))
@@ -373,16 +366,8 @@ class Emitter {
           "not" => _emitNegation(nodes),
           // (do ... ... ...) (groups multiple exprs together for use in (if ... ...) etc.)
           "do" => _emitDoBlock(nodes),
-          // (cget lst 0) (get using indexing)
-          // "cget" => _emitIndexing(nodes),
-          // (cset lst 0 5) (set using indexing)
-          // "cset" => _emitIndexing(nodes, set: true),
           // (+ x y)
           _ when _operators.containsKey(id) => _emitOperator(id, nodes),
-          // (#for-each lst print) (calls for-each as a method on lst, the first argument)
-          // _ when id.startsWith("#") => _emitMethodCall(idNode, nodes),
-          // (@is-even i) / (set (@length lst) lst 1) ()
-          _ when id.startsWith("@") => _emitPropertyAccess(idNode, nodes),
           // anything else (not a keyword)
           _ => _emitFunctionCall(idNode, nodes),
         };
@@ -401,9 +386,7 @@ class Emitter {
     };
   }
 
-  String emit(Node ast, {Node? stdlibAst}) {
-    // final formatter = DartFormatter(languageVersion: Version(3, 7, 3));
-
+  Future<String> emit(Node ast, {Node? stdlibAst}) async {
     final astWithStdlib =
         stdlibAst != null
             ? (stdlibAst.contents as List<Node>) + (ast.contents as List<Node>)
@@ -412,17 +395,8 @@ class Emitter {
     final expandedAst = MacroExpander().expand(astWithStdlib);
 
     final ir = _emitStatementBody(expandedAst);
+    final maybeFormattedIr = await _tryFormatIr(ir);
 
-    return ir;
-
-    // try {
-    //   return formatter.format(emittedCode);
-    // } on ArgumentError catch (e) {
-    //   print("Error while formatting: ${e.message}");
-    //   return emittedCode;
-    // } on FormatterException catch (e) {
-    //   print("Error while formatting: ${e.message(color: true)}");
-    //   return emittedCode;
-    // }
+    return maybeFormattedIr;
   }
 }
