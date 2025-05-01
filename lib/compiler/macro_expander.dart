@@ -68,7 +68,15 @@ class MacroExpander {
                 hasExpanded = true;
 
                 final replacementIdx = replacementArgs.indexOf(name);
-                return args[replacementIdx];
+
+                if (name.startsWith("&")) {
+                  return ListNode([
+                    SymbolNode("do"),
+                    ...args.sublist(replacementIdx),
+                  ]);
+                } else {
+                  return args[replacementIdx];
+                }
               // We have a list so we need to go deeper
               case ListNode(contents: final List<Node> contents):
                 final (
@@ -100,7 +108,6 @@ class MacroExpander {
 
     for (final node in nodes) {
       var didExpandInLastAttempt = false;
-
       do {
         didExpandInLastAttempt = false;
 

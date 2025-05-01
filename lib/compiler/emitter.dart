@@ -22,7 +22,7 @@ const _operators = {
 
 const moduleSeparator = "#";
 
-const Set<String> _specialFormsNotTerminatedWithSemicolons = {};
+const _specialFormsNotTerminatedWithSemicolons = {"do"};
 
 class Emitter {
   /*================================== Data ==================================*/
@@ -71,7 +71,7 @@ class Emitter {
           final exprStr = _emitExpr(node);
 
           final id =
-              node.contents is List
+              node.contents is List && node.contents.isNotEmpty
                   ? ((node.contents[0] as SymbolNode).contents as String)
                   : "";
           final shouldTerminateWithSemicolon =
@@ -116,6 +116,7 @@ class Emitter {
     List<Node> nodes, {
     bool private = false,
     bool lambda = false,
+    bool recursive = false,
   }) {
     String emitFunction({
       SymbolNode? name,
@@ -128,7 +129,8 @@ class Emitter {
               name != null ? _emitSymbol(name, private: private) : "";
           final argsStr = args != null ? _emitCommaSeparatedItems(args) : "";
           final bodyStr = _emitStatementBody(bodyNodes);
-          final keywordStr = !lambda ? "let $nameStr = " : "";
+          final maybeRecursiveStr = !lambda && recursive ? " rec " : " ";
+          final keywordStr = !lambda ? "let$maybeRecursiveStr$nameStr = " : "";
           return "$keywordStr($argsStr) => {\n$bodyStr\n}";
       }
     }
@@ -165,8 +167,8 @@ class Emitter {
     bool private = false,
   }) {
     switch (nodes) {
-      case [final SymbolNode name, final value]:
-        final nameStr = _emitSymbol(name, private: private);
+      case [final Node name, final value] when name is! ListNode:
+        final nameStr = _emitExpr(name);
         final valueStr = _emitExpr(value);
         final maybeMutableValueStr = mutable ? "ref($valueStr)" : valueStr;
         return "let $nameStr = $maybeMutableValueStr";
@@ -348,7 +350,18 @@ class Emitter {
           "use" => _emitModuleImport(nodes),
           // (def[p] puts [str] ...)
           _ when id.startsWith("def") && id.length >= 3 && id.length <= 4 =>
-            _emitFunctionDefinition(nodes, private: id.contains("p")),
+            _emitFunctionDefinition(
+              nodes,
+              private: id.contains("p"),
+              recursive: false,
+            ),
+          // (defrec[p] puts [str] ...)
+          _ when id.startsWith("defrec") && id.length >= 6 && id.length <= 7 =>
+            _emitFunctionDefinition(
+              nodes,
+              private: id.contains("p"),
+              recursive: true,
+            ),
           // (fn [str] ...)
           "fn" => _emitFunctionDefinition(nodes, lambda: true),
           // (let[mp] x 5)
@@ -395,6 +408,7 @@ class Emitter {
     final expandedAst = MacroExpander().expand(astWithStdlib);
 
     final ir = _emitStatementBody(expandedAst);
+    print("NONFORMATTED IR: $ir");
     final maybeFormattedIr = await _tryFormatIr(ir);
 
     return maybeFormattedIr;

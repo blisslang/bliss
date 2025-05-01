@@ -4,11 +4,11 @@
   (cond (pred thenb)
         (else elseb)))
 
-(defmacro when [pred thenb]
-  (cond (pred thenb)))
+(defmacro when [pred &thenbs]
+  (cond (pred &thenbs)))
 
-(defmacro unless [pred unlessb]
-  (when (not pred) unlessb))
+(defmacro unless [pred &unlessbs]
+  (when (not pred) &unlessbs))
 
 (defmacro set+ [var n] (set var (+ var n)))
 (defmacro set- [var n] (set var (- var n)))
