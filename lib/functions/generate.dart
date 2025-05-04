@@ -7,10 +7,7 @@ import 'package:bliss/constants.dart';
 import 'package:bliss/functions/stdlib.dart';
 import 'package:cli_spin/cli_spin.dart';
 
-Future<(String, String)> generate(
-  String inputFileName, {
-  bool noStdlib = false,
-}) async {
+(String, String) generate(String inputFileName, {bool noStdlib = false}) {
   final inputFile = File(inputFileName);
   final contents = inputFile.readAsStringSync();
 
@@ -35,19 +32,27 @@ Future<(String, String)> generate(
   final stdlibAst = noStdlib ? null : generateStdlibAst();
   final ast = Categorizer().categorize(tokens);
 
-  spinner.text = "Emitting Dart...";
+  spinner.text = "Emitting IR...";
 
-  final emittedCode = await Emitter().emit(ast, stdlibAst: stdlibAst);
-
-  final codeWithStdlib = emittedCode;
+  final ir = Emitter().emit(ast, stdlibAst: stdlibAst);
+  final irWithStdlib = ir;
 
   File(irOutputFileName)
     ..createSync(recursive: true)
-    ..writeAsStringSync(codeWithStdlib);
+    ..writeAsStringSync(irWithStdlib);
 
-  spinner.success(
-    "Generated Dart code: $colorCyan$irOutputFileName$colorReset",
-  );
+  spinner.success("Generated IR: $colorCyan$irOutputFileName$colorReset");
 
   return (irOutputFileName, exeOutputFileName);
+}
+
+String generateDry(String input, {bool noStdlib = false}) {
+  final tokens = tokenize(input);
+
+  final stdlibAst = noStdlib ? null : generateStdlibAst();
+  final ast = Categorizer().categorize(tokens);
+
+  final ir = Emitter().emit(ast, stdlibAst: stdlibAst, noFormatting: true);
+
+  return ir;
 }

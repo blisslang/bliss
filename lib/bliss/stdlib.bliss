@@ -1,23 +1,20 @@
-; Macros ;
-
-(defmacro if [pred thenb elseb]
-  (cond (pred thenb)
-        (else elseb)))
-
-(defmacro when [pred &thenbs]
-  (cond (pred &thenbs)))
-
-(defmacro unless [pred &unlessbs]
-  (when (not pred) &unlessbs))
-
-(defmacro set+ [var n] (set var (+ var n)))
-(defmacro set- [var n] (set var (- var n)))
-(defmacro set* [var n] (set var (* var n)))
-(defmacro set/ [var n] (set var (/ var n)))
-
-; (defmacro -> []) ;
-
 (defmod Bliss
+  (defmod Macros
+    (defmacro if [pred thenb elseb]
+      (cond (pred thenb)
+            (else elseb)))
+
+    (defmacro when [pred &thenbs]
+      (cond (pred &thenbs)))
+
+    (defmacro unless [pred &unlessbs]
+      (when (not pred) &unlessbs))
+
+    (defmacro set+ [var n] (set var (+ var n)))
+    (defmacro set- [var n] (set var (- var n)))
+    (defmacro set* [var n] (set var (* var n)))
+    (defmacro set/ [var n] (set var (/ var n))))
+
   (defmod List
     (def swap [lst i j]
       (let len (List#length lst))

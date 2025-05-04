@@ -6,12 +6,25 @@ environment:
   sdk: ^3.7.3
 
 scripts:
+  clean:
+    - rm -rf build
+
   prebuild:
-    - mkdir -p build
+    - mkdir -p build/exe
     - dart run build_runner clean
     - dart run build_runner build --delete-conflicting-outputs
   build:
-    - dart compile exe bin/bliss.dart -o build/bliss.exe
+    - dart compile exe bin/bliss.dart -o build/exe/bliss.exe
+
+  prebuild-wasm:
+    - mkdir -p build/wasm
+    - dart run build_runner clean
+    - dart run build_runner build --delete-conflicting-outputs
+  build-wasm:
+    - dart compile wasm bin/wasm.dart -o build/wasm/bliss.wasm
+  postbuild-wasm:
+    - rm -rf docs/app/bliss-wasm
+    - ln -srd build/wasm docs/app/bliss-wasm
 
   prebliss:
     - dart run build_runner clean
@@ -25,6 +38,7 @@ dependencies:
   dart_style: ^3.0.1
   embed_annotation: ^1.2.2
   pub_semver: ^2.2.0
+  web: ^1.1.1
 
 dev_dependencies:
   lints: ^5.0.0

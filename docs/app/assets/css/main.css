@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: "Geist", sans-serif;
+  --font-title: "Bricolage Grotesque", sans-serif;
+  --font-code: "Geist Mono", monospace;
+}

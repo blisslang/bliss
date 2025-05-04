@@ -399,7 +399,7 @@ class Emitter {
     };
   }
 
-  Future<String> emit(Node ast, {Node? stdlibAst}) async {
+  String emit(Node ast, {Node? stdlibAst, bool noFormatting = false}) {
     final astWithStdlib =
         stdlibAst != null
             ? (stdlibAst.contents as List<Node>) + (ast.contents as List<Node>)
@@ -409,7 +409,13 @@ class Emitter {
 
     final ir = _emitStatementBody(expandedAst);
     print("NONFORMATTED IR: $ir");
-    final maybeFormattedIr = await _tryFormatIr(ir);
+    late final String maybeFormattedIr;
+
+    if (!noFormatting) {
+      _tryFormatIr(ir).then((formattedIr) => maybeFormattedIr = formattedIr);
+    } else {
+      maybeFormattedIr = ir;
+    }
 
     return maybeFormattedIr;
   }
