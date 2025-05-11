@@ -4,7 +4,6 @@ import Compiler.Categorizer (categorize)
 import Compiler.Emitter (emit)
 import Compiler.Tokenizer (tokenize)
 import Constants (buildDir)
-import Control.Concurrent (threadDelay)
 import Data.List (elemIndex)
 import Data.Maybe (fromMaybe)
 import System.Directory (createDirectoryIfMissing, exeExtension)
@@ -39,19 +38,13 @@ generate inputFileName = do
 
   let tokens = tokenize contents
 
-  threadDelay 500000
-
   putStrLn "   🔹 Parsing tokens"
 
   let ast = categorize tokens
 
-  threadDelay 500000
-
   putStrLn "   🔹 Emitting IR"
 
   let ir = emit ast
-
-  threadDelay 500000
 
   createDirectoryIfMissing True outputDir
   writeFile irOutputFileName ir
