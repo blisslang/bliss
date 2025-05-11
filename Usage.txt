@@ -1,0 +1,8 @@
+The compiler and toolchain for the Bliss Programming Language.
+
+Usage:
+  bliss generate <file>
+      Generate IR from Bliss source code (a .bliss file)
+
+Options:
+  -h --help  Show help

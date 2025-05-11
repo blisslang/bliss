@@ -1,59 +1,19 @@
-(def midpoint [point-a point-b]
-  (let [x1 y1] point-a)
-  (let [x2 y2] point-b)
-  (let mid-x (/ (+ x1 x2) 2))
-  (let mid-y (/ (+ y1 y2) 2))
-  [mid-x mid-y])
+(defmod Core
+  (defmod IO
+    (def puts [str]
+      (print-string str))
 
-(defrec sierpinksi-points [level p1 p2 p3]
-  (if (<= level 0)
-    [p1 p2 p3]
-    (do
-      (let midpoint-12 (midpoint p1 p2))
-      (let midpoint-23 (midpoint p2 p3))
-      (let midpoint-31 (midpoint p3 p1))
-      (let point-sub-triangle1 (sierpinksi-points (- level 1) p1 midpoint-12 midpoint-31))
-      (let point-sub-triangle2 (sierpinksi-points (- level 1) midpoint-12 p2 midpoint-23))
-      (let point-sub-triangle3 (sierpinksi-points (- level 1) midpoint-31 midpoint-23 p3))
-      (let all-points (+ points-sub-triangle1 points-sub-triangle2 points-sub-triangle3))
-      all-points)))
+    (def putln [x]
+      (print-endline x)))
 
-(def summarize-points-data [points-list]
-  (defrec count-recursive [lst]
-    (if (List#is-empty lst)
-      0
-      (do
-        (let tail (List#tl lst))
-        (+ 1 (count-recursive tail)))))
+  (defmod Math
+    (def fib [n]
+      (cond ((<= n 1) n)
+            (else (+ (fib (- n 1)) (fib (- n 2))))))))
 
-  (defrec take-recursive [n lst]
-    (if (or (<= n 0) (List#is-empty lst))
-      []
-      (do
-        (let head (List#hd lst))
-        (let tail (List#tl lst))
-        (List#append [head] (take-recursive (- n 1) tail)))))
+(use Core)
 
-  (let total-count (count-recursive points-list))
-  (let num-to-take 5)
-  (let first-few-points (take-recursive num-to-take points-list))
-  [total-count first-few-points])
-
-(let recursion-level 3)
-(let corner1 [0.0 0.0])
-(let corner2 [100.0 0.0])
-(let height (* (/ (sqrt 3) 2.0) 100))
-(let corner3 [50.0 height])
-(let list-of-points (sierpinksi-points recursion-level corner1 corner2 corner3))
-(let [count sample-points] (summarize-points-data list-of-points))
-(print-int count)
-(print-int (List#length sample-points))
-
-(defrec print-items-recursive [items]
-  (unless (List#is-empty items)
-    (let head (List#hd items))
-    (let tail (List#tl items))
-    (print-int head)
-    (print-items-recursive tail)))
-
-(print-items-recursive sample-points)
+(def main
+  (let res (Math/fib 8))
+  (IO/puts "Fib result: ")
+  (IO/putln res))
