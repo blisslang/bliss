@@ -1,6 +1,8 @@
-module Utils (isDelim, throw, snakeCasify, escapeInvalidChars) where
+module Utils (isDelim, throw, snakeCasify, escapeInvalidChars, lastIndexOf, fixedPoint) where
 
 import Data.Char (isAlphaNum)
+import Data.List (elemIndex)
+import Data.Maybe (fromMaybe)
 import GHC.Base (ord)
 
 moduleSeparator :: Char
@@ -42,3 +44,18 @@ escapeInvalidChars input =
 
 throw :: (Show a) => a -> b
 throw err = error $ show err
+
+lastIndexOf :: (Eq a) => a -> [a] -> Int
+lastIndexOf el list =
+  length list
+    - 1
+    - fromMaybe
+      0
+      (elemIndex el $ reverse list)
+
+fixedPoint :: (Eq a) => (a -> a) -> a -> a
+fixedPoint f x =
+  let nextX = f x
+   in if nextX == x
+        then x
+        else fixedPoint f nextX

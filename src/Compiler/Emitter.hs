@@ -1,5 +1,6 @@
 module Compiler.Emitter (emit) where
 
+import Compiler.MacroExpander (expand)
 import Compiler.Mod (Node (ListNode, NumberNode, StringNode, SymbolNode, ValueListNode), isListNode, isSymbolNode)
 import Data.List (intercalate)
 import Data.Maybe (fromJust, isJust)
@@ -213,5 +214,7 @@ emitExpr (ValueListNode nodes) = emitValueList $ ValueListNode nodes
 emitExpr (ListNode nodes) = emitList $ ListNode nodes
 
 emit :: Node -> String
-emit (ListNode astNodes) = emitStatementBody astNodes
+emit (ListNode astNodes) =
+  let expandedAst = expand astNodes
+   in emitStatementBody expandedAst
 emit _ = error "AST has to be wrapped with a ListNode"

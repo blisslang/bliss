@@ -27,6 +27,7 @@ library
   exposed-modules:
       Compiler.Categorizer
       Compiler.Emitter
+      Compiler.MacroExpander
       Compiler.Mod
       Compiler.Tokenizer
       Constants

@@ -4,29 +4,18 @@ import Compiler.Categorizer (categorize)
 import Compiler.Emitter (emit)
 import Compiler.Tokenizer (tokenize)
 import Constants (buildDir)
-import Data.List (elemIndex)
-import Data.Maybe (fromMaybe)
 import System.Directory (createDirectoryIfMissing, exeExtension)
+import Utils (lastIndexOf)
 
 generate :: String -> IO (String, String)
 generate inputFileName = do
   contents <- readFile inputFileName
 
-  let lastDotIdx =
-        length inputFileName
-          - 1
-          - fromMaybe
-            0
-            (elemIndex '.' $ reverse inputFileName)
+  let lastDotIdx = lastIndexOf '.' inputFileName
   let (inputFileNameWithoutExt, _) = splitAt lastDotIdx inputFileName
   let outputFileNameWithoutExt = buildDir ++ "/" ++ inputFileNameWithoutExt
 
-  let lastSlashIdx =
-        length outputFileNameWithoutExt
-          - 1
-          - fromMaybe
-            0
-            (elemIndex '/' $ reverse outputFileNameWithoutExt)
+  let lastSlashIdx = lastIndexOf '/' outputFileNameWithoutExt
   let (outputDir, _) = splitAt lastSlashIdx outputFileNameWithoutExt
 
   let irOutputFileName = outputFileNameWithoutExt ++ ".re"
