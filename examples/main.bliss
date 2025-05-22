@@ -1,29 +1,23 @@
-(defmod Core
-  ; Macros (hoisted) ;
-  (defmacro if [pred thenb elseb]
-    (cond (pred thenb)
-          (else elseb)))
+(defmacro if [pred thenb elseb]
+  (cond (pred thenb)
+        (else elseb)))
 
-  (defmacro when [pred &exprs]
-    (cond (pred &exprs)))
+(defmacro when [pred &exprs]
+  (cond (pred &exprs)))
 
-  (defmacro unless [pred &exprs]
-    (when (not pred) &exprs))
+(defmacro unless [pred &exprs]
+  (when (not pred) &exprs))
 
-  (defmod IO
-    (def puts [str]
-      (print-string str))
+(def IO/puts [str]
+  (print-string str))
 
-    (def putln [x]
-      (print-endline x)))
+(def IO/putln [x]
+  (print-endline x))
 
-  (defmod Math
-    (def fib [n]
-      (if (<= n 1)
-          n
-          (+ (fib (- n 1)) (fib (- n 2)))))))
-
-(use Core)
+(def Math/fib [n]
+  (if (<= n 1)
+      n
+      (+ (Math/fib (- n 1)) (Math/fib (- n 2)))))
 
 (def main
   (let res (Math/fib 8))
