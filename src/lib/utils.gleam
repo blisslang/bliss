@@ -1,5 +1,6 @@
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import pprint
 
 const delims = ["[", "]", "(", ")", ";"]
 
@@ -71,4 +72,15 @@ fn do_index_of(el: a, lst: List(a), index: Int) -> Option(Int) {
     [head, ..] if head == el -> Some(index)
     [_, ..tail] -> do_index_of(el, tail, index + 1)
   }
+}
+
+pub fn pprint(x: a) {
+  pprint.with_config(
+    x,
+    pprint.Config(
+      style_mode: pprint.Styled,
+      bit_array_mode: pprint.KeepBitArrays,
+      label_mode: pprint.Labels,
+    ),
+  )
 }

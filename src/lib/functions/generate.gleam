@@ -1,8 +1,9 @@
 import gleam/io
-import lib/compiler/codegen
+import lib/compiler/ast
 import lib/compiler/lexer
+import lib/compiler/macro_expander
 import lib/compiler/parser
-import pprint
+import lib/utils
 import simplifile
 
 pub fn generate(input_filename: String) {
@@ -14,19 +15,31 @@ pub fn generate(input_filename: String) {
 
   let tokens = lexer.tokenize(contents)
   io.println("TOKENS:")
-  pprint.debug(tokens)
+  io.println(utils.pprint(tokens))
 
   io.println("    * Parsing tokens")
 
-  let ast = parser.categorize(tokens)
+  let atom_tree = parser.categorize(tokens)
+  io.println("ATOM TREE:")
+  io.println(utils.pprint(atom_tree))
+
+  io.println("    * Expanding macros")
+
+  let expanded_atom_tree = macro_expander.expand(atom_tree)
+  io.println("EXPANDED ATOM TREE:")
+  io.println(utils.pprint(expanded_atom_tree))
+
+  io.println("    * Constructing AST")
+
+  let ast = ast.construct(expanded_atom_tree)
   io.println("AST:")
-  pprint.debug(ast)
+  io.println(utils.pprint(ast))
 
   io.println("    * Emitting IR")
 
-  let ir = codegen.emit(ast)
-  io.println("IR:")
-  pprint.debug(ir)
+  // let ir = codegen.emit(ast)
+  // io.println("IR:")
+  // io.println(utils.pprint(ir))
 
   io.println("    * Generated IR: " <> input_filename)
 }
