@@ -1,17 +1,7 @@
-(defmacro defn [name params &exprs]
-	(let name (fn params &exprs)))
-
-(defmacro def [name &exprs]
-	(let name (fn [] &exprs)))
-
-(defmacro if [pred thenb elseb]
-	(cond (pred thenb)
-				(else elseb)))
-
 (defn fib [n]
 	(if (>= 2 n)
-		n
-		(+ (fib (- n 1)) (fib (- n 2)))))
+			n
+			(+ (fib (- n 1)) (fib (- n 2)))))
 
 (def main
 	(let fib-res (fib 8))

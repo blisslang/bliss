@@ -1,4 +1,5 @@
 import gleam/io
+import lib/bliss
 import lib/compiler/ast
 import lib/compiler/lexer
 import lib/compiler/macro_expander
@@ -9,11 +10,13 @@ import simplifile
 pub fn generate(input_filename: String) {
   let assert Ok(contents) = simplifile.read(from: input_filename)
 
+  let contents_with_prelude = bliss.prelude <> contents
+
   io.println("==> Generating: " <> input_filename <> " -> " <> input_filename)
 
   io.println("    * Lexing source")
 
-  let tokens = lexer.tokenize(contents)
+  let tokens = lexer.tokenize(contents_with_prelude)
   io.println("TOKENS:")
   io.println(utils.pprint(tokens))
 

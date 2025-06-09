@@ -20,11 +20,9 @@ fn construct_conditional_branch(branch: Atom) {
 }
 
 fn construct_conditional(atoms: List(Atom)) -> Node {
-  let len = list.length(atoms)
-
-  case len > 0 && len % 2 == 0 {
+  case list.length(atoms) > 0 {
     False ->
-      panic as { "Imbalanced conditional branches: " <> utils.pprint(atoms) }
+      panic as { "Invalid conditional branches: " <> utils.pprint(atoms) }
     True -> {
       let branches = list.map(atoms, construct_conditional_branch)
 
