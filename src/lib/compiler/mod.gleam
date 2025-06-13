@@ -9,19 +9,26 @@ pub type Atom {
   NumberAtom(Float)
 }
 
+pub type VariableType {
+  FloatType
+  StringType
+  UntypedType
+}
+
 pub type Node {
   ProgramNode(body: List(Node))
-  ConditionalBranchNode(pred: Node, body: List(Node))
+
   ConditionalNode(branches: List(Node))
+  BranchNode(pred: Node, body: List(Node))
   DoBlockNode(body: List(Node))
-  MacroDefinitionNode(name: String, params: List(Node), body: List(Node))
   LambdaFunctionNode(params: List(Node), body: List(Node))
   LetBindingNode(name: String, value: Node)
   FunctionCallNode(name: String, params: List(Node))
-  ValueListNode(items: List(Node))
+  VariableNode(name: String, typ: VariableType)
+
+  ListNode(items: List(Node))
   StringNode(value: String)
   NumberNode(value: Float)
-  SymbolNode(name: String)
 }
 
 pub fn add_to_atom(atom: Atom, new_atom: Atom) -> Atom {

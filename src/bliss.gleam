@@ -17,13 +17,21 @@ fn generate_command() -> glint.Command(Nil) {
     |> glint.flag_help("Print debug information during generation"),
   )
 
+  use no_prelude_flag <- glint.flag(
+    glint.bool_flag("no-prelude")
+    |> glint.flag_default(False)
+    |> glint.flag_help("Do not include the prelude in the generated code"),
+  )
+
   use named, _args, flags <- glint.command()
 
   let file = file_arg(named)
 
   let assert Ok(debug) = debug_flag(flags)
 
-  generate.generate(file, debug)
+  let assert Ok(no_prelude) = no_prelude_flag(flags)
+
+  generate.generate(file, debug:, no_prelude:)
 }
 
 pub fn main() -> Nil {
