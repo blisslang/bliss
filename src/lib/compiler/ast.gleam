@@ -15,14 +15,14 @@ fn construct_conditional_branch(branch: Atom) {
 
       ConditionalBranchNode(pred:, body:)
     }
-    atom -> panic as { "Invalid conditional branch: " <> utils.pprint(atom) }
+    atom -> panic as { "Invalid conditional branch: " <> utils.styled(atom) }
   }
 }
 
 fn construct_conditional(atoms: List(Atom)) -> Node {
   case list.length(atoms) > 0 {
     False ->
-      panic as { "Invalid conditional branches: " <> utils.pprint(atoms) }
+      panic as { "Invalid conditional branches: " <> utils.styled(atoms) }
     True -> {
       let branches = list.map(atoms, construct_conditional_branch)
 
@@ -50,7 +50,7 @@ fn construct_macro_definition(atoms: List(Atom)) {
       case list.all(params, mod.is_symbol_atom) {
         False ->
           panic as {
-            "Invalid macro definition parameters" <> utils.pprint(params)
+            "Invalid macro definition parameters" <> utils.styled(params)
           }
         True -> {
           let params = handle_atom_list(params)
@@ -60,7 +60,7 @@ fn construct_macro_definition(atoms: List(Atom)) {
         }
       }
     }
-    atoms -> panic as { "Malformed macro definition: " <> utils.pprint(atoms) }
+    atoms -> panic as { "Malformed macro definition: " <> utils.styled(atoms) }
   }
 }
 
@@ -70,7 +70,7 @@ fn construct_lambda_function(atoms: List(Atom)) -> Node {
       case list.all(params, mod.is_symbol_atom) {
         False ->
           panic as {
-            "Invalid lambda function parameters" <> utils.pprint(params)
+            "Invalid lambda function parameters" <> utils.styled(params)
           }
         True -> {
           let params = handle_atom_list(params)
@@ -80,7 +80,7 @@ fn construct_lambda_function(atoms: List(Atom)) -> Node {
         }
       }
     }
-    _ -> panic as { "Malformed lambda function" <> utils.pprint(atoms) }
+    _ -> panic as { "Malformed lambda function" <> utils.styled(atoms) }
   }
 }
 
@@ -91,7 +91,7 @@ fn construct_let_binding(atoms: List(Atom)) -> Node {
 
       LetBindingNode(name:, value:)
     }
-    _ -> panic as { "Malformed let binding" <> utils.pprint(atoms) }
+    _ -> panic as { "Malformed let binding" <> utils.styled(atoms) }
   }
 }
 
@@ -109,7 +109,7 @@ fn handle_list(atoms: List(Atom)) -> Node {
     [SymbolAtom("fn"), ..atoms] -> construct_lambda_function(atoms)
     [SymbolAtom("let"), ..atoms] -> construct_let_binding(atoms)
     [SymbolAtom(name), ..atoms] -> construct_function_call(name, atoms)
-    _ -> panic as { "Malformed expression" <> utils.pprint(atoms) }
+    _ -> panic as { "Malformed expression" <> utils.styled(atoms) }
   }
 }
 

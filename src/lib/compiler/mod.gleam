@@ -31,7 +31,7 @@ pub fn add_to_atom(atom: Atom, new_atom: Atom) -> Atom {
     _ ->
       panic as {
         "Expected one of: (ListAtom ValueListAtom), got: "
-        <> utils.pprint(new_atom)
+        <> utils.styled(new_atom)
       }
   }
 }

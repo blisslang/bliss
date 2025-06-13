@@ -8,12 +8,22 @@ const description = "The compiler and toolchain for the Bliss Programming Langua
 
 fn generate_command() -> glint.Command(Nil) {
   use <- glint.command_help("Generates IR from a .bliss file.")
+
   use file_arg <- glint.named_arg("file")
-  use named, _args, _flags <- glint.command()
+
+  use debug_flag <- glint.flag(
+    glint.bool_flag("debug")
+    |> glint.flag_default(False)
+    |> glint.flag_help("Print debug information during generation"),
+  )
+
+  use named, _args, flags <- glint.command()
 
   let file = file_arg(named)
 
-  generate.generate(file)
+  let assert Ok(debug) = debug_flag(flags)
+
+  generate.generate(file, debug)
 }
 
 pub fn main() -> Nil {

@@ -49,6 +49,14 @@ pub fn fixed_point(f: fn(a) -> a, x: a) -> a {
   }
 }
 
+fn do_index_of(el: a, lst: List(a), index: Int) -> Option(Int) {
+  case lst {
+    [] -> None
+    [head, ..] if head == el -> Some(index)
+    [_, ..tail] -> do_index_of(el, tail, index + 1)
+  }
+}
+
 /// Gets the index of an element in a list.
 ///
 /// Stops iterating over the list when the element is found.
@@ -66,15 +74,7 @@ pub fn list_index_of(el: a, in lst: List(a)) -> Option(Int) {
   do_index_of(el, lst, 0)
 }
 
-fn do_index_of(el: a, lst: List(a), index: Int) -> Option(Int) {
-  case lst {
-    [] -> None
-    [head, ..] if head == el -> Some(index)
-    [_, ..tail] -> do_index_of(el, tail, index + 1)
-  }
-}
-
-pub fn pprint(x: a) {
+pub fn styled(x: a) {
   pprint.with_config(
     x,
     pprint.Config(
@@ -83,4 +83,11 @@ pub fn pprint(x: a) {
       label_mode: pprint.Labels,
     ),
   )
+}
+
+pub fn do_if(bol: Bool, f: fn() -> Nil) -> Nil {
+  case bol {
+    True -> f()
+    False -> Nil
+  }
 }

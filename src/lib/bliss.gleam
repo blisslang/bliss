@@ -12,6 +12,6 @@ pub const prelude = "
     (when (not pred) &exprs))
 
   (defmacro if [pred thenb elseb]
-    (cond (pred thenb))
-          (else elseb))
+    (cond (pred thenb)
+          (else elseb)))
 "
