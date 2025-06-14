@@ -526,7 +526,7 @@ pub fn infer(ast: Node) -> Node {
               VariableExpr("if"),
               FunctionCallExpr(
                 FunctionCallExpr(VariableExpr("<="), VariableExpr("n")),
-                NumberExpr(1.0),
+                NumberExpr(2.0),
               ),
             ),
             VariableExpr("n"),
@@ -561,7 +561,7 @@ pub fn infer(ast: Node) -> Node {
 
   "
   (let fib (fn [n]
-    (if (<= n 1)
+    (if (<= n 2)
         n
         (+ (fib (- n 1)) (fib (- n 2))))))
   (let fib-res (fib 8))
