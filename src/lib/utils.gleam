@@ -1,5 +1,6 @@
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam_community/ansi
 import pprint
 
 const delims = ["[", "]", "(", ")", ";"]
@@ -90,4 +91,8 @@ pub fn do_if(bol: Bool, f: fn() -> Nil) -> Nil {
     True -> f()
     False -> Nil
   }
+}
+
+pub fn format_error(message message: String, hint hint: String) {
+  "\n" <> ansi.red("Error") <> ": " <> message <> "\n\n" <> hint <> "\n"
 }

@@ -4,6 +4,7 @@ import lib/compiler/ast
 import lib/compiler/lexer
 import lib/compiler/macro_expander
 import lib/compiler/parser
+import lib/compiler/type_inference
 import lib/utils
 import simplifile
 
@@ -55,6 +56,15 @@ pub fn generate(
   utils.do_if(debug, fn() {
     io.println("AST:")
     io.println(utils.styled(ast))
+  })
+
+  io.println("    * Inferring types")
+
+  let typed_ast = type_inference.infer(ast)
+
+  utils.do_if(debug, fn() {
+    io.println("TYPED AST:")
+    io.println(utils.styled(typed_ast))
   })
 
   io.println("    * Emitting IR")

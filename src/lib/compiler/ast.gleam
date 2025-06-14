@@ -1,9 +1,9 @@
 import gleam/list
 import lib/compiler/mod.{
-  type Atom, type Node, BranchNode, ConditionalNode, DoBlockNode, FloatType,
-  FunctionCallNode, LambdaFunctionNode, LetBindingNode, ListAtom,
-  ListNode as ValueListNode, NumberAtom, NumberNode, ProgramNode, StringAtom,
-  StringNode, SymbolAtom, UntypedType, ValueListAtom, VariableNode,
+  type Atom, type Node, BooleanNode, BranchNode, ConditionalNode, DoBlockNode,
+  FunctionCallNode, LambdaFunctionNode, LetBindingNode, ListAtom, NumberAtom,
+  NumberNode, ProgramNode, StringAtom, StringNode, SymbolAtom, UntypedType,
+  ValueListAtom, ValueListNode, VariableNode,
 }
 import lib/utils
 
@@ -49,7 +49,7 @@ fn construct_lambda_function(atoms: List(Atom)) -> Node {
           let params = handle_atom_list(params)
           let body = handle_atom_list(body)
 
-          LambdaFunctionNode(params:, body:)
+          LambdaFunctionNode(params:, typ: UntypedType, body:)
         }
       }
     }
@@ -62,7 +62,7 @@ fn construct_let_binding(atoms: List(Atom)) -> Node {
     [SymbolAtom(name), value] -> {
       let value = handle_atom(value)
 
-      LetBindingNode(name:, value:)
+      LetBindingNode(name:, value:, typ: UntypedType)
     }
     _ -> panic as { "Malformed let binding: " <> utils.styled(atoms) }
   }
@@ -71,7 +71,7 @@ fn construct_let_binding(atoms: List(Atom)) -> Node {
 fn construct_function_call(name: String, atoms: List(Atom)) -> Node {
   let params = handle_atom_list(atoms)
 
-  FunctionCallNode(name:, params:)
+  FunctionCallNode(name:, params:, typ: UntypedType)
 }
 
 fn handle_list(atoms: List(Atom)) -> Node {
@@ -99,8 +99,12 @@ fn handle_string(str: String) -> Node {
   StringNode(value: str)
 }
 
-fn handle_variable(name: String) -> Node {
-  VariableNode(name:, typ: UntypedType)
+fn handle_symbol(name: String) -> Node {
+  case name {
+    "true" -> BooleanNode(value: True)
+    "false" -> BooleanNode(value: False)
+    name -> VariableNode(name:, typ: UntypedType)
+  }
 }
 
 fn handle_atom_list(atoms: List(Atom)) -> List(Node) {
@@ -113,7 +117,7 @@ fn handle_atom(atom: Atom) -> Node {
     NumberAtom(num) -> handle_number(num)
     StringAtom(str) -> handle_string(str)
     ListAtom(atoms) -> handle_list(atoms)
-    SymbolAtom(name) -> handle_variable(name)
+    SymbolAtom(name) -> handle_symbol(name)
   }
 }
 

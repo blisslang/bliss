@@ -10,8 +10,12 @@ pub type Atom {
 }
 
 pub type VariableType {
-  FloatType
+  NumberType
   StringType
+  BooleanType
+
+  UnitType
+
   UntypedType
 }
 
@@ -20,15 +24,17 @@ pub type Node {
 
   ConditionalNode(branches: List(Node))
   BranchNode(pred: Node, body: List(Node))
+
   DoBlockNode(body: List(Node))
-  LambdaFunctionNode(params: List(Node), body: List(Node))
-  LetBindingNode(name: String, value: Node)
-  FunctionCallNode(name: String, params: List(Node))
+  LambdaFunctionNode(params: List(Node), typ: VariableType, body: List(Node))
+  LetBindingNode(name: String, typ: VariableType, value: Node)
+  FunctionCallNode(name: String, params: List(Node), typ: VariableType)
   VariableNode(name: String, typ: VariableType)
 
-  ListNode(items: List(Node))
+  ValueListNode(items: List(Node))
   StringNode(value: String)
   NumberNode(value: Float)
+  BooleanNode(value: Bool)
 }
 
 pub fn add_to_atom(atom: Atom, new_atom: Atom) -> Atom {
