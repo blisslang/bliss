@@ -1,4 +1,4 @@
-pub const self = "
+pub const PRELUDE: &str = "
 ;------------------------------- Macros -------------------------------;
 
 (defmacro def [name &exprs]
@@ -27,5 +27,5 @@ pub const self = "
 
 ;------------------------------ Helpers -------------------------------;
 
-(let else 0)
-"
+(let else true)
+";

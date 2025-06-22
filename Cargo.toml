@@ -1,0 +1,9 @@
+[package]
+name = "bliss"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.40", features = ["derive"] }
+lit-vek = "0.1.0"
+spinners = "4.1.1"
