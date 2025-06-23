@@ -2,7 +2,7 @@ use spinners::{Spinner, Spinners};
 
 use crate::{
     bliss_lib::prelude::PRELUDE,
-    compiler::{ast, lexer, macro_expander, parser::Parser},
+    compiler::{ast, lexer, macro_expander, parser::Parser, type_inference::TypeInference},
 };
 use std::{error::Error, fs};
 
@@ -63,19 +63,19 @@ pub fn generate(input_filename: &str, debug: bool, no_prelude: bool) -> Result<(
 
     let mut sp = Spinner::new(Spinners::Dots, "Inferring types".to_string());
 
-    // let typed_ast = type_inference::infer(&ast)?;
-    //
+    let typed_ast = TypeInference::default().infer(&ast)?;
+
     sp.stop_with_symbol("✅");
 
-    // if debug {
-    //     println!("TYPED AST:");
-    //     println!("{:#?}", typed_ast);
-    // }
+    if debug {
+        println!("TYPED AST:");
+        println!("{:#?}", typed_ast);
+    }
 
     let mut sp = Spinner::new(Spinners::Dots, "Emitting IR".to_string());
 
     // let ir = codegen::emit(&typed_ast)?;
-    //
+
     sp.stop_with_symbol("✅");
 
     // if debug {
