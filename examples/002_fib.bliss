@@ -1,9 +1,9 @@
 (defn fib [n]
-	(if (<= 2 n)
-			n
-			(+ (fib (- n 1)) (fib (- n 2)))))
+    (if (< n 2)
+        n
+        (+ (fib (- n 1) (fib (- n 1)))))
 
 (def main
-	(let fib-res (fib 8))
-	(print "Fib result:")
-	(print fib-res))
+    (let fib-res (fib 8))
+    (print "Fib result:")
+    (print fib-res))

@@ -1,14 +1,14 @@
 (def main
-	(when true
-				(print "when"))
+    (when true
+        (print "when true"))
 
-	(unless true
-					(print "unless"))
+    (unless true
+        (print "unless true"))
 
-	(if true
-			(print "then")
-			(print "else"))
+    (if true
+        (print "if true then")
+        (print "if true else"))
 
-	(cond (true	 (print "true"))
-				(false (print "false"))
-				(else	 (print "otherwise"))))
+    (cond (true  (print "cond true"))
+          (false (print "cond false"))
+          (else  (print "cond else"))))
